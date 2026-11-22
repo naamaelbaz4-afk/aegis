@@ -1,0 +1,579 @@
+/* ========== צבעים כלליים ========== */
+/* משתנים של צבעים. משתמשים בהם בכל הקובץ עם var(--שם), וכך משנים צבע במקום אחד */
+:root {
+  --bg: #0a0f1e;                       /* רקע האתר */
+  --panel: #121a2f;                    /* רקע הכרטיסים */
+  --panel2: #18223b;                   /* רקע כרטיס מסומן */
+  --line: rgba(255, 255, 255, 0.08);   /* צבע המסגרות הדקות */
+  --text: #eef2fa;                     /* צבע הטקסט הראשי */
+  --muted: #95a3c0;                    /* צבע טקסט משני, אפור */
+  --red: #ff3d57;
+  --orange: #ff8a3d;
+  --amber: #ffb627;
+  --blue: #4c8dff;
+  --green: #2ecc71;
+}
+
+/* מאפסים את המרווחים שהדפדפן מוסיף לבד, כדי שהעיצוב ייראה אותו דבר בכל דפדפן */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;  /* הרוחב של אלמנט כולל גם את המסגרת והריפוד שלו */
+}
+
+/* העיצוב של הדף כולו: גופן, רקע כהה עם שני כתמי צבע עדינים, וצבע טקסט */
+body {
+  font-family: "Heebo", Arial, sans-serif;
+  background: var(--bg);
+  background-image: radial-gradient(circle at 85% 0%, rgba(255, 61, 87, 0.15), transparent 40%),
+                    radial-gradient(circle at 0% 60%, rgba(76, 141, 255, 0.10), transparent 40%);
+  background-attachment: fixed;  /* הרקע לא זז כשגוללים */
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* כפתורים ושדות קלט מקבלים את אותו גופן כמו שאר האתר */
+button, input, select { font-family: inherit; }
+
+/* ========== סרגל עליון ========== */
+/* הסרגל נשאר למעלה גם כשגוללים (sticky), ויש לו רקע שקוף ומטושטש */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;                     /* מעל שאר התוכן */
+  display: flex;                   /* הלוגו והתפריט באותה שורה */
+  justify-content: space-between;  /* הלוגו בצד אחד והתפריט בצד השני */
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;                 /* במסך צר עוברים לשורה חדשה */
+  padding: 14px 5%;
+  background: rgba(10, 15, 30, 0.85);
+  backdrop-filter: blur(12px);     /* טשטוש של מה שמאחורי הסרגל */
+  border-bottom: 1px solid var(--line);
+}
+
+/* הלוגו: האייקון והשם אחד ליד השני */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.logo strong { display: block; font-size: 22px; letter-spacing: 3px; }
+.logo small { color: var(--muted); font-size: 12px; }
+
+/* האייקון של הלוגו: ריבוע עם מעבר צבע, שנחתך לצורת מגן */
+.logo-icon {
+  width: 42px;
+  height: 46px;
+  display: grid;
+  place-items: center;  /* האות A באמצע */
+  font-weight: 900;
+  font-size: 20px;
+  background: linear-gradient(135deg, var(--red), var(--orange));
+  clip-path: polygon(50% 0, 100% 15%, 100% 55%, 50% 100%, 0 55%, 0 15%); /* צורת מגן */
+}
+
+/* התפריט: הכפתורים בשורה אחת */
+.nav { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* כפתור בתפריט: בלי רקע ובלי מסגרת, טקסט אפור */
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;  /* השינוי בריחוף קורה בהדרגה */
+}
+/* כשהעכבר מעל הכפתור */
+.nav-btn:hover { color: var(--text); background: var(--panel); }
+/* הכפתור של העמוד הנוכחי: רקע וקו אדום למטה */
+.nav-btn.active { color: white; background: var(--panel2); box-shadow: inset 0 -2px 0 var(--red); }
+
+/* העיגול האדום עם מספר ההתראות בתפריט */
+.badge {
+  background: var(--red);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  margin-right: 4px;
+}
+
+/* ========== מעבר בין עמודים ========== */
+/* האזור הראשי: ברוחב 90% מהמסך, לא יותר מ-1150 פיקסלים, ובאמצע */
+main { width: 90%; max-width: 1150px; margin: 0 auto; padding: 40px 0 60px; }
+
+/* כל העמודים מוסתרים... */
+.page { display: none; }
+/* ...חוץ מהעמוד שיש לו active. הוא מופיע עם אנימציה */
+.page.active { display: block; animation: fadeIn 0.4s ease; }
+
+/* האנימציה: העמוד מופיע בהדרגה ועולה קצת למעלה */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== כפתורים ========== */
+/* העיצוב המשותף לכל הכפתורים הגדולים */
+.btn {
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+/* בריחוף הכפתור עולה קצת */
+.btn:hover { transform: translateY(-2px); }
+/* כפתור ראשי: מעבר צבע מאדום לכתום עם צל זוהר */
+.btn-primary { color: white; background: linear-gradient(135deg, var(--red), var(--orange)); box-shadow: 0 10px 30px rgba(255, 61, 87, 0.35); }
+/* כפתור משני: שקוף עם מסגרת */
+.btn-ghost { color: var(--text); background: transparent; border: 1px solid var(--line); }
+.btn-ghost:hover { background: var(--panel); }
+/* כפתור לבן, בשביל הבאנר הצבעוני */
+.btn-light { color: var(--red); background: white; }
+
+/* ========== עמוד בית ========== */
+/* החלק העליון: הטקסט בצד אחד והאיור בצד השני */
+.hero {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;  /* עמודת הטקסט קצת יותר רחבה */
+  align-items: center;
+  gap: 40px;
+  min-height: 70vh;                  /* לפחות 70% מגובה המסך */
+}
+
+/* התגית הקטנה "פרויקט גמר" מעל הכותרת */
+.tag {
+  display: inline-block;
+  color: var(--orange);
+  background: rgba(255, 138, 61, 0.1);
+  border: 1px solid rgba(255, 138, 61, 0.3);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* הכותרת הראשית. clamp: הגודל משתנה לפי רוחב המסך, בין 36 ל-62 פיקסלים */
+.hero h1 { font-size: clamp(36px, 5.5vw, 62px); line-height: 1.15; font-weight: 900; margin-bottom: 20px; }
+
+/* טקסט צבעוני במעבר צבע: הרקע הצבעוני "נחתך" לצורת האותיות */
+.gradient {
+  background: linear-gradient(135deg, var(--red), var(--orange));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* פסקת ההסבר והכפתורים מתחת לכותרת */
+.hero p { color: var(--muted); font-size: 19px; max-width: 560px; margin-bottom: 30px; }
+.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* איור עמוד המצוקה */
+/* המיכל של האיור: כל החלקים אחד מתחת לשני ובמרכז */
+.device {
+  position: relative;
+  height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* הטבעות האדומות שמתרחבות סביב העמוד */
+.ring {
+  position: absolute;  /* מעל העמוד, לא דוחפות את שאר החלקים */
+  width: 260px;
+  height: 260px;
+  border: 2px solid var(--red);
+  border-radius: 50%;  /* עיגול */
+  animation: pulse 3s infinite;
+}
+/* הטבעת השנייה מתחילה באיחור, כדי שהטבעות יבואו אחת אחרי השנייה */
+.ring2 { animation-delay: 1.5s; }
+
+/* האנימציה: הטבעת גדלה ונעלמת */
+@keyframes pulse {
+  from { transform: scale(0.6); opacity: 0.8; }
+  to   { transform: scale(1.6); opacity: 0; }
+}
+
+/* גוף העמוד: מלבן מעוגל עם צל */
+.pole {
+  position: relative;
+  width: 150px;
+  padding: 20px 16px;
+  background: linear-gradient(160deg, #26324f, #141c31);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* עדשת המצלמה: עיגול כהה עם מסגרת */
+.cam { width: 26px; height: 26px; border-radius: 50%; background: #0a0f1e; border: 4px solid #3a4768; }
+
+/* המסך הקטן של העמוד */
+.screen {
+  width: 100%;
+  background: #02060f;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-family: monospace;  /* גופן שנראה כמו מסך דיגיטלי */
+  color: #7fd4ff;
+}
+.screen b { display: block; letter-spacing: 2px; }
+.screen span { font-size: 12px; font-family: "Heebo"; }
+
+/* הנורית האדומה שמהבהבת */
+.led { width: 14px; height: 14px; border-radius: 50%; background: var(--red); box-shadow: 0 0 14px var(--red); animation: blink 1s infinite; }
+
+/* אנימציית הבהוב: באמצע הזמן הנורית כמעט שקופה */
+@keyframes blink { 50% { opacity: 0.2; } }
+
+/* כפתור SOS: עיגול אדום עם ברק וזוהר. אפשר ללחוץ עליו */
+.sos {
+  cursor: pointer;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 20px;
+  background: radial-gradient(circle at 35% 30%, #ff7a8a, var(--red));
+  box-shadow: 0 0 0 6px rgba(255, 61, 87, 0.2), 0 10px 25px rgba(255, 61, 87, 0.5);
+}
+
+/* הרגל של העמוד, שנעלמת בהדרגה למטה */
+.pole-stand { width: 22px; height: 70px; background: linear-gradient(#26324f, transparent); }
+
+/* פס מספרים */
+/* ארבעה מספרים בשורה אחת */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);  /* ארבע עמודות שוות */
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  margin: 20px 0 30px;
+}
+/* כל מספר, עם קו מפריד בצד */
+.stat { padding: 26px; text-align: center; border-left: 1px solid var(--line); }
+/* לאחרון אין קו מפריד */
+.stat:last-child { border-left: none; }
+.stat b { display: block; font-size: 40px; font-weight: 900; color: var(--orange); }
+.stat span { color: var(--muted); font-size: 15px; }
+
+/* תיבת דיווח על פיגוע */
+/* תיבה עם מסגרת אדומה וזוהר: הטקסט בצד אחד והכפתור בצד השני */
+.report {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  align-items: center;
+  gap: 24px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 61, 87, 0.45);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 0 40px rgba(255, 61, 87, 0.12);
+}
+.report h2 { font-size: 28px; font-weight: 800; }
+.report p { color: var(--muted); }
+/* הרשימה והכפתור באותה שורה */
+.report-form { display: flex; gap: 10px; flex-wrap: wrap; }
+/* הרשימה תופסת את כל המקום שנשאר */
+.report-form .field { flex: 1; min-width: 180px; }
+/* האפשרויות ברשימה הנפתחת עם רקע כהה */
+.report-form .field option { background: var(--panel); }
+
+/* ========== כרטיסים ורשתות ========== */
+/* כותרת של כל אזור בעמוד */
+.section-title { font-size: 30px; font-weight: 800; margin: 60px 0 24px; }
+
+/* רשת של כרטיסים: שלושה בשורה */
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+/* רשת של ארבעה בשורה */
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* כרטיס: רקע כהה, מסגרת דקה ופינות מעוגלות */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px;
+  transition: 0.25s;
+}
+/* בריחוף הכרטיס עולה קצת והמסגרת מתבהרת */
+.card:hover { transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.18); }
+.card h3 { font-size: 20px; margin-bottom: 8px; }
+.card p { color: var(--muted); }
+
+/* הריבוע הקטן עם הסמל בראש הכרטיס */
+.icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+/* צבעים לסמלים: הסמל בצבע מלא, והרקע באותו צבע אבל שקוף */
+.icon.red    { color: var(--red);   background: rgba(255, 61, 87, 0.12); }
+.icon.amber  { color: var(--amber); background: rgba(255, 182, 39, 0.12); }
+.icon.blue   { color: var(--blue);  background: rgba(76, 141, 255, 0.12); }
+.icon.green  { color: var(--green); background: rgba(46, 204, 113, 0.12); }
+
+/* שלבים */
+/* ארבעה שלבים בשורה */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+/* כל שלב: כרטיס עם קו אדום למעלה */
+.step { position: relative; padding: 26px; border-top: 3px solid var(--red); background: var(--panel); border-radius: 0 0 18px 18px; }
+/* מספר השלב: גדול ושקוף */
+.step span { font-size: 44px; font-weight: 900; color: rgba(255, 255, 255, 0.12); }
+.step h3 { font-size: 20px; }
+.step p { color: var(--muted); }
+
+/* באנר בסוף עמוד הבית */
+/* תיבה צבעונית במעבר צבע, עם טקסט באמצע */
+.cta {
+  margin-top: 70px;
+  padding: 50px 30px;
+  text-align: center;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--red), var(--orange));
+}
+.cta h2 { font-size: 34px; font-weight: 900; }
+.cta p { font-size: 18px; margin: 8px 0 24px; opacity: 0.9; }
+
+/* ========== כותרת עמוד פנימי ========== */
+/* הכותרת בצד אחד, ובצד השני משהו נוסף (שעון או חיפוש) */
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.page-head h1 { font-size: 40px; font-weight: 900; }
+.page-head p { color: var(--muted); font-size: 17px; }
+
+/* ההערה הצהובה "מצב הדגמה", עם מסגרת מקווקוות */
+.demo-note {
+  color: var(--amber);
+  background: rgba(255, 182, 39, 0.08);
+  border: 1px dashed rgba(255, 182, 39, 0.4);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* ========== עמוד התראות ========== */
+/* התיבה של "שידור חי" והשעון */
+.live-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 10px 18px;
+  border-radius: 12px;
+  color: var(--red);
+  font-weight: 700;
+}
+/* השעון עצמו, בגופן דיגיטלי */
+.live-box b { color: var(--text); font-family: monospace; font-size: 20px; }
+
+/* הנקודה האדומה שמהבהבת ליד "שידור חי" */
+.live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); animation: blink 1s infinite; }
+
+/* קופסאות הסיכום. auto-fit: כמה שנכנסות בשורה, כל אחת לפחות 200 פיקסלים */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.sum { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; }
+.sum b { display: block; font-size: 34px; font-weight: 900; }
+.sum span { color: var(--muted); }
+/* המספר בכל קופסה בצבע של המצב שלה */
+.sum.new b { color: var(--red); }
+.sum.checking b { color: var(--amber); }
+.sum.confirmed b { color: var(--blue); }
+
+/* רשימת ההתראות והמפה, שתי עמודות אחת ליד השנייה */
+.alerts-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+/* הכרטיסים ברשימה אחד מתחת לשני */
+.alerts-list { display: grid; gap: 14px; }
+
+/* המפה */
+/* המפה נשארת במקום כשגוללים את רשימת ההתראות */
+.map-box { position: sticky; top: 100px; }
+/* הגודל והמסגרת של המפה */
+#map { height: 540px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); }
+/* ההסבר הקטן מתחת למפה */
+.map-hint { color: var(--muted); font-size: 14px; text-align: center; margin-top: 8px; }
+/* הכיתובים על המפה ("אני כאן" וסוג האירוע) */
+.leaflet-tooltip { font-family: inherit; font-weight: 700; }
+.leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9); } /* הופך את המפה לכהה */
+
+/* כרטיס התראה: הטקסט בצד אחד והמצב בצד השני, עם פס צבעוני בצד ימין */
+.alert {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-right: 5px solid var(--red);  /* הפס הצבעוני: אדום להתראה חדשה */
+  border-radius: 16px;
+  padding: 20px 24px;
+  cursor: pointer;
+}
+/* ההתראה שנבחרה מקבלת מסגרת לבנה */
+.alert.selected { outline: 2px solid rgba(255, 255, 255, 0.4); }
+/* צבע הפס לפי המצב: צהוב באימות, כחול מאומת */
+.alert.checking { border-right-color: var(--amber); }
+.alert.confirmed { border-right-color: var(--blue); }
+
+.alert h3 { font-size: 21px; }
+/* פרטי ההתראה (מיקום, מקור, מרחק, שעה) אחד ליד השני */
+.alert-info { display: flex; gap: 22px; flex-wrap: wrap; color: var(--muted); font-size: 15px; }
+.alert-info b { color: var(--text); font-weight: 500; }
+/* הטקסט הקטן של הדיוק ליד המיקום */
+.alert-info small, .event-place small { color: var(--muted); font-size: 13px; }
+
+/* התגית של המצב ("התראה חדשה" וכו'). ברירת המחדל אדומה */
+.status {
+  align-self: start;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+  background: rgba(255, 61, 87, 0.12);
+}
+/* צבע התגית לפי המצב */
+.checking .status { color: var(--amber); background: rgba(255, 182, 39, 0.12); }
+.confirmed .status { color: var(--blue); background: rgba(76, 141, 255, 0.12); }
+
+/* ההודעה שמופיעה כשאין התראות או כשהחיפוש לא מצא כלום */
+.empty { text-align: center; color: var(--muted); padding: 50px; background: var(--panel); border-radius: 16px; }
+
+/* ========== עמוד אודות ========== */
+/* הכרטיס הראשון "מה זה AEGIS?" */
+.about-intro h2 { font-size: 26px; margin-bottom: 10px; }
+.about-intro p { font-size: 18px; }
+
+/* השרטוט של שלושת המקורות עד ההתראה: הכול בשורה אחת */
+.flow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+/* שלושת המקורות אחד מתחת לשני */
+.flow-sources { display: grid; gap: 12px; flex: 1.3; min-width: 240px; }
+/* כל תיבה בשרטוט */
+.flow-box {
+  flex: 1;
+  min-width: 180px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-weight: 700;
+  font-size: 18px;
+}
+/* ההסבר הקטן בתוך כל תיבה */
+.flow-box small { display: block; color: var(--muted); font-weight: 400; font-size: 14px; }
+/* תיבת האימות במסגרת צהובה */
+.flow-box.main { border-color: var(--amber); }
+/* תיבת ההתראה לציבור באדום */
+.flow-box.final { border-color: var(--red); background: rgba(255, 61, 87, 0.1); }
+/* החצים בין התיבות */
+.flow-arrow { font-size: 30px; color: var(--muted); }
+
+/* כרטיסי הרכיבים עם קו כחול למעלה */
+.part { border-top: 3px solid var(--blue); }
+
+
+/* פרטי ההגשה בסוף העמוד, בכמה עמודות */
+.credits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 20px;
+  margin-top: 60px;
+}
+.credits small { display: block; color: var(--muted); }
+.credits b { font-size: 17px; }
+
+/* ========== עמוד היסטוריה ========== */
+/* עיצוב משותף לשדות: תיבת החיפוש והרשימה הנפתחת בדיווח */
+.field {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 16px;
+  padding: 12px 18px;
+  border-radius: 12px;
+}
+/* כשלוחצים על שדה, המסגרת נצבעת בכתום */
+.field:focus { outline: none; border-color: var(--orange); }
+/* הרוחב של תיבת החיפוש */
+.search { width: 300px; max-width: 100%; }
+
+/* רשת כרטיסי האירועים. כמה שנכנסים בשורה, כל אחד לפחות 330 פיקסלים */
+.history-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px; }
+
+/* כרטיס אירוע */
+.event { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+/* השורה העליונה: מספר האירוע ותגית "הסתיים" */
+.event-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.event-id { color: var(--muted); }
+/* התגית הירוקה "הסתיים" */
+.ended { color: var(--green); background: rgba(46, 204, 113, 0.12); padding: 3px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+.event h3 { font-size: 20px; }
+/* המקום של האירוע, בכתום */
+.event-place { color: var(--orange); margin-bottom: 14px; }
+
+/* טבלת הפרטים: שתי עמודות, שם הפרט והערך שלו */
+.event-table { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 15px; margin-bottom: 14px; }
+.event-table span { color: var(--muted); }
+
+/* התקציר בתחתית הכרטיס, עם קו מפריד מעליו */
+.event p { color: var(--muted); font-size: 15px; border-top: 1px solid var(--line); padding-top: 12px; }
+
+/* ========== תחתית ========== */
+/* השורה בתחתית האתר */
+.footer { text-align: center; color: var(--muted); padding: 30px; border-top: 1px solid var(--line); font-size: 14px; }
+
+/* ========== מסכים קטנים (טלפון) ========== */
+/* הכללים כאן פועלים רק כשהמסך צר מ-850 פיקסלים (טאבלט וטלפון) */
+@media (max-width: 850px) {
+  .hero, .report { grid-template-columns: 1fr; }               /* עמודה אחת במקום שתיים */
+  .hero { text-align: center; }
+  .hero p { margin: 0 auto 30px; }
+  .hero-buttons { justify-content: center; }
+  .device { height: 340px; }                                    /* איור קטן יותר */
+  .stats, .grid, .grid-4, .steps { grid-template-columns: 1fr 1fr; }  /* שניים בשורה */
+  .stat { border-left: none; }
+  .flow-arrow { transform: rotate(-90deg); margin: 0 auto; }    /* החצים מצביעים למטה */
+  .alerts-layout { grid-template-columns: 1fr; }                /* המפה מעל הרשימה */
+  .map-box { position: static; order: -1; }
+  #map { height: 320px; }
+}
+
+/* הכללים כאן פועלים רק כשהמסך צר מ-520 פיקסלים (טלפון) */
+@media (max-width: 520px) {
+  .stats, .grid, .grid-4, .steps { grid-template-columns: 1fr; }  /* אחד בשורה */
+  .topbar { justify-content: center; }
+  .alert { grid-template-columns: 1fr; }                          /* המצב מתחת לטקסט */
+  .status { justify-self: start; }
+}
