@@ -70,6 +70,14 @@ let selectedId = null;  // ההתראה שנבחרה ומוצגת על המפה
 
 const EVENT_LENGTH = 180;  // כמה שניות אירוע נשאר פעיל עד שהוא מסתיים (3 דקות)
 
+// ---------- הגדרות להתראה לטלפון (ntfy) ----------
+// שם "הערוץ" שאליו נשלחות ההתראות. רק מי שנרשם לשם הזה באפליקציית ntfy יקבל אותן,
+// לכן כדאי לבחור שם ארוך שאף אחד לא ינחש
+const NTFY_TOPIC = "aegis-naama-7f3k9q";
+
+// הכתובת של האתר באינטרנט (למשל ב-GitHub Pages). לחיצה על ההתראה בטלפון פותחת את הכתובת הזאת
+const SITE_URL = "https://naamaelbaz4-afk.github.io/aegis/";
+
 
 // ===================================================
 //  חלק 3: המפה (Leaflet + OpenStreetMap, חינם ובלי מפתח)
@@ -160,8 +168,10 @@ function savePosition(position) {
     lon: position.coords.longitude,                  // קו אורך
     accuracy: Math.round(position.coords.accuracy)  // ברדיוס של כמה מטרים המיקום מדויק
   };
-  // מציירים מחדש, כדי שהמרחקים והנקודה "אני כאן" יתעדכנו
-  renderAlerts();
+  // אם יש התראה מסומנת: מזיזים את המפה כך שיראו גם אותה וגם אותי.
+  // אחרת רק מציירים מחדש, כדי שהמרחקים והנקודה "אני כאן" יתעדכנו
+  if (selectedId !== null) selectAlert(selectedId);
+  else renderAlerts();
 }
 
 
@@ -205,6 +215,9 @@ async function finishReport(type, lat, lon) {
   // מוסיפים את ההתראה ללוח
   const id = addAlert(type, place, "דיווח מהאתר", lat, lon);
 
+  // שולחים התראה לטלפון
+  notifyPhone(type, place, lat, lon);
+
   // מחזירים את הכפתור למצב הרגיל, עוברים לעמוד ההתראות ומראים את הדיווח על המפה
   document.getElementById("reportBtn").textContent = "דיווח על פיגוע";
   showPage("alerts");
@@ -243,6 +256,52 @@ async function getAddress(lat, lon) {
 // לעמוד יש מיקום קבוע, אז לא צריך לזהות מיקום
 function pressSOS() {
   const id = addAlert("לחיצה על לחצן מצוקה", "עמוד 12, רחוב הגליל, טבריה", "עמוד מצוקה", 32.7880, 35.5380);
+  notifyPhone("לחיצה על לחצן מצוקה", "עמוד 12, רחוב הגליל, טבריה", 32.7880, 35.5380);
+  showPage("alerts");
+  selectAlert(id);
+}
+
+// שולחים התראה לטלפון דרך השירות ntfy (חינם, בלי הרשמה ובלי שרת משלנו)
+// בהתראה יש קישור לאתר, ובקישור נמצאים כל פרטי האירוע: סוג, מקום ומיקום על המפה
+function notifyPhone(type, place, lat, lon) {
+  // מורידים תגיות HTML מהמקום (למשל <small> של רמת הדיוק), כי בהתראה יש רק טקסט
+  const cleanPlace = place.replace(/<[^>]*>/g, "").trim();
+
+  // בונים את הקישור: הכתובת של האתר ועוד הפרטים של האירוע אחרי סימן השאלה
+  const params = new URLSearchParams({ type: type, place: cleanPlace });
+  if (lat != null) {
+    params.set("lat", lat.toFixed(5));
+    params.set("lon", lon.toFixed(5));
+  }
+  const link = SITE_URL + "?" + params.toString();
+
+  // שולחים את ההתראה לשרת של ntfy, והוא מעביר אותה לכל טלפון שרשום לערוץ
+  fetch("https://ntfy.sh/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      topic: NTFY_TOPIC,
+      title: "AEGIS: התראה באזורך",
+      message: type + " · " + cleanPlace + "\nלחצו כדי לראות על המפה איפה האירוע ואיפה אתם.",
+      tags: ["rotating_light"],  // אייקון של צופר משטרה בהתראה
+      priority: 5,               // עדיפות הכי גבוהה: ההתראה מצלצלת וקופצת על המסך
+      click: link                // מה נפתח כשלוחצים על ההתראה
+    })
+  }).catch(() => console.log("לא הצלחנו לשלוח התראה לטלפון"));
+}
+
+// כשנכנסים לאתר מהקישור שבהתראה: מציגים את האירוע מהקישור על המפה
+function openAlertFromLink() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("type")) return;  // נכנסו לאתר רגיל, לא מהתראה
+
+  const lat = params.has("lat") ? Number(params.get("lat")) : null;
+  const lon = params.has("lon") ? Number(params.get("lon")) : null;
+  // הטקסט מהקישור מוצג בדף, אז הופכים תווים כמו < לטקסט רגיל, כדי שאי אפשר יהיה להכניס דרכו קוד
+  const safe = text => text.replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
+  const id = addAlert(safe(params.get("type")), safe(params.get("place") || "מיקום לא ידוע"), "התראה שהתקבלה בטלפון", lat, lon);
+
+  // עוברים לעמוד ההתראות ומסמנים את האירוע. כשהמיקום שלי יזוהה, המפה תראה את שנינו
   showPage("alerts");
   selectAlert(id);
 }
@@ -420,6 +479,9 @@ function showClock() {
 addAlert("לחיצה על לחצן מצוקה", "עמוד 4, רחוב יהודה הלוי, טבריה", "עמוד מצוקה", 32.7896, 35.5340, 120);
 addAlert("חשד לאירוע ירי", "שדרות רבין, עפולה", "מצלמה חכמה", 32.6075, 35.2920, 40);
 addAlert("חשד לפיגוע דריסה", "תחנה מרכזית, נוף הגליל", "דיווח אזרח", 32.7046, 35.3245, 0);
+
+// אם נכנסו מהקישור שבהתראה, מציגים את האירוע
+openAlertFromLink();
 
 // מזהים את המיקום שלי, כדי להציג אותו על המפה ולחשב מרחקים
 navigator.geolocation.getCurrentPosition(savePosition);
