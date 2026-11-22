@@ -27,48 +27,27 @@ document.querySelectorAll("[data-page]").forEach(element => {
 
 
 // ===================================================
-//  חלק 2: נתוני הדמה
-//  כרגע אין שרת אמיתי, אז המידע נשמר כאן במערכים.
+//  חלק 2: הדיווחים
+//  אין יותר נתוני דמה: כל הדיווחים מגיעים מהשרת,
+//  ורק אני והחברים שהצטרפו עם הקוד יכולים לדווח.
 // ===================================================
 
-// התראות שנכנסות למערכת לבד, אחת כל 45 שניות (המיקומים בקירוב)
-// לכל התראה: סוג אירוע, מקום, מקור הדיווח, וקו רוחב וקו אורך בשביל המפה
-const incoming = [
-  { type: "חשד לאירוע ירי", place: "שדרות רבין, עפולה", source: "מצלמה חכמה", lat: 32.6075, lon: 35.2920 },
-  { type: "חשד לפיגוע דריסה", place: "תחנה מרכזית, נוף הגליל", source: "דיווח אזרח", lat: 32.7046, lon: 35.3245 },
-  { type: "חשד לפיגוע דקירה", place: "רחוב הרצל, בית שאן", source: "עמוד מצוקה", lat: 32.4975, lon: 35.4980 },
-  { type: "ריצה המונית חריגה", place: "טיילת טבריה", source: "מצלמה חכמה", lat: 32.7915, lon: 35.5410 }
-];
+// כל הדיווחים מהשרת, מ-48 השעות האחרונות (של כל חברי המערכת)
+let reports = [];
+// מתוכם: האירועים הפעילים עכשיו, והאירועים שהסתיימו (ההיסטוריה)
+let alerts = [];
+let history = [];
 
-// אירועים שכבר הסתיימו ומוצגים בעמוד ההיסטוריה
-// לכל אירוע: מספר, סוג, מקום, תאריך, שעת התחלה וסיום, משך בדקות, מי אימת אותו, ותקציר
-const history = [
-  { id: 1008, type: "חשד לפיגוע דקירה", place: "רחוב הבנים, טבריה", date: "17.11.2026", start: "18:42", end: "19:05", minutes: 23,
-    sources: "עמוד מצוקה, 2 מצלמות, 4 דיווחי אזרחים", summary: "האירוע אומת תוך פחות מדקה. כוחות הגיעו למקום, והציבור באזור קיבל עדכון על סיום האירוע." },
-  { id: 1007, type: "לחיצה על לחצן מצוקה", place: "עמוד 7, טיילת טבריה", date: "16.11.2026", start: "21:10", end: "21:16", minutes: 6,
-    sources: "עמוד מצוקה, מצלמה", summary: "המוקד בדק את תמונת המצלמה וזיהה לחיצה בטעות. לא נשלחה התראה לציבור." },
-  { id: 1006, type: "חשד לאירוע ירי", place: "שדרות ירושלים, עפולה", date: "14.11.2026", start: "13:27", end: "14:02", minutes: 35,
-    sources: "3 מצלמות, 9 דיווחי אזרחים", summary: "המצלמות זיהו ריצה המונית. נשלחה התראה ברדיוס 8 ק״מ, והאירוע נסגר אחרי שהכוחות סרקו את האזור." },
-  { id: 1005, type: "חשד לפיגוע דריסה", place: "צומת גולני", date: "12.11.2026", start: "07:55", end: "08:20", minutes: 25,
-    sources: "מצלמה, 6 דיווחי אזרחים", summary: "האירוע אומת משני מקורות. נהגים והולכי רגל באזור קיבלו הנחיה להתרחק מהצומת." },
-  { id: 1004, type: "ריצה המונית חריגה", place: "שוק העירייה, בית שאן", date: "10.11.2026", start: "11:03", end: "11:12", minutes: 9,
-    sources: "2 מצלמות", summary: "התברר שהייתה זו תקלה במערכת הכריזה בשוק. האירוע נסגר בלי התראה לציבור." },
-  { id: 1003, type: "חשד לפיגוע דקירה", place: "תחנה מרכזית, נוף הגליל", date: "07.11.2026", start: "16:40", end: "17:01", minutes: 21,
-    sources: "עמוד מצוקה, מצלמה, 3 דיווחי אזרחים", summary: "עד ראייה לחץ על לחצן המצוקה. האירוע אומת, והמגיבים הראשונים הגיעו למיקום המדויק של העמוד." },
-  { id: 1002, type: "לחיצה על לחצן מצוקה", place: "עמוד 2, רחוב הרצל, עפולה", date: "04.11.2026", start: "09:15", end: "09:31", minutes: 16,
-    sources: "עמוד מצוקה, 2 דיווחי אזרחים", summary: "אדם נזקק לעזרה רפואית ברחוב. האירוע הועבר לגורמי ההצלה ונסגר." },
-  { id: 1001, type: "חשד לאירוע ירי", place: "שכונת שפירא, טבריה", date: "01.11.2026", start: "22:48", end: "23:30", minutes: 42,
-    sources: "2 מצלמות, 11 דיווחי אזרחים", summary: "האירוע הראשון שתועד במערכת. נשלחה התראה ברדיוס 10 ק״מ, והאירוע נסגר אחרי סריקות בשטח." }
-];
-
-// משתנים שמשתנים תוך כדי שהאתר רץ
-let alerts = [];        // ההתראות הפעילות עכשיו
-let nextId = 1009;      // המספר של האירוע הבא
-let rounds = 0;         // כמה פעמים רץ העדכון
 let myPos = null;       // המיקום שלי (אחרי שהדפדפן מזהה אותו)
 let selectedId = null;  // ההתראה שנבחרה ומוצגת על המפה
+let timeOffset = 0;     // ההפרש בין השעון של השרת לשעון של המכשיר
+let rounds = 0;         // כמה פעמים רץ העדכון
 
-const EVENT_LENGTH = 180;  // כמה שניות אירוע נשאר פעיל עד שהוא מסתיים (3 דקות)
+const EVENT_LENGTH = 180;  // כמה שניות אירוע נשאר פעיל עד שהוא עובר להיסטוריה (3 דקות)
+
+// הטקסט בדיווחים מגיע מאנשים אחרים, אז הופכים תווים כמו < לטקסט רגיל,
+// כדי שאי אפשר יהיה להכניס דרכו קוד לאתר
+const safe = text => String(text).replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
 
 // ---------- הגדרות השרת ----------
 // הכתובת של השרת שלנו ב-Cloudflare (מעתיקים אותה מדף ה-Worker אחרי שיוצרים אותו)
@@ -121,7 +100,7 @@ function drawMap() {
     marker.on("click", () => selectAlert(alert.id));
 
     // מעל ההתראה שנבחרה מופיע סוג האירוע
-    if (selected) marker.bindTooltip(alert.type, { permanent: true, direction: "top" });
+    if (selected) marker.bindTooltip(safe(alert.type), { permanent: true, direction: "top" });
   });
 }
 
@@ -208,16 +187,15 @@ async function finishReport(type, lat, lon) {
     place = await getAddress(lat, lon) + ` <small>(דיוק של כ־${myPos.accuracy} מטר)</small>`;
   }
 
-  // מוסיפים את ההתראה ללוח
-  const id = addAlert(type, place, "דיווח מהאתר", lat, lon);
-
-  // שולחים התראה לטלפון
-  notifyPhone(type, place, lat, lon);
+  // שולחים את הדיווח לשרת. השרת שומר אותו ושולח התראה לכל מי שבטווח
+  document.getElementById("reportBtn").textContent = "שולח את הדיווח...";
+  const report = await notifyPhone(type, place, lat, lon, "דיווח מהאתר");
 
   // מחזירים את הכפתור למצב הרגיל, עוברים לעמוד ההתראות ומראים את הדיווח על המפה
   document.getElementById("reportBtn").textContent = "דיווח על פיגוע";
+  if (!report) return;
   showPage("alerts");
-  selectAlert(id);
+  selectAlert(report.id);
 }
 
 // הופכים קואורדינטות לכתובת (רחוב ועיר) בעזרת OpenStreetMap, חינם ובלי מפתח
@@ -250,11 +228,11 @@ async function getAddress(lat, lon) {
 
 // לחיצה על כפתור SOS באיור, בדיוק כמו בעמוד המצוקה האמיתי
 // לעמוד יש מיקום קבוע, אז לא צריך לזהות מיקום
-function pressSOS() {
-  const id = addAlert("לחיצה על לחצן מצוקה", "עמוד 12, רחוב הגליל, טבריה", "עמוד מצוקה", 32.7880, 35.5380);
-  notifyPhone("לחיצה על לחצן מצוקה", "עמוד 12, רחוב הגליל, טבריה", 32.7880, 35.5380);
+async function pressSOS() {
+  const report = await notifyPhone("לחיצה על לחצן מצוקה", "עמוד 12, רחוב הגליל, טבריה", 32.7880, 35.5380, "עמוד מצוקה");
+  if (!report) return;
   showPage("alerts");
-  selectAlert(id);
+  selectAlert(report.id);
 }
 
 // ---------- התראות לטלפון דרך השרת שלנו ----------
@@ -279,23 +257,49 @@ async function callServer(path, data) {
   return response.json();
 }
 
-// שולחים את הדיווח לשרת. השרת מחליט מי בטווח ושולח לו התראה
-async function notifyPhone(type, place, lat, lon) {
+// שולחים את הדיווח לשרת. השרת שומר אותו, מחליט מי בטווח ושולח לו התראה
+// מחזירים את הדיווח כפי שנשמר בשרת (עם מספר אירוע ושעה), או null אם נכשל
+async function notifyPhone(type, place, lat, lon, source) {
   const code = getCode();
-  if (!code) return;
+  if (!code) return null;
 
-  // מורידים תגיות HTML מהמקום (למשל <small> של רמת הדיוק), כי בהתראה יש רק טקסט
+  // מורידים תגיות HTML מהמקום (למשל <small> של רמת הדיוק), כי בשרת נשמר רק טקסט
   const cleanPlace = place.replace(/<[^>]*>/g, "").trim();
 
   try {
-    const result = await callServer("/report", { code, type, place: cleanPlace, lat, lon });
-    if (result.ok) console.log("ההתראה נשלחה ל-" + result.sent + " טלפונים");
-    else {
+    const result = await callServer("/report", { code, type, place: cleanPlace, lat, lon, source });
+    if (!result.ok) {
       alert("השרת לא קיבל את הדיווח: " + result.error);
       if (result.error === "קוד שגוי") localStorage.removeItem("aegisCode");
+      return null;
     }
+    console.log("ההתראה נשלחה ל-" + result.sent + " טלפונים");
+
+    // מוסיפים את הדיווח לרשימה מיד, בלי לחכות לטעינה הבאה מהשרת
+    reports.unshift(result.report);
+    rebuild();
+    return result.report;
   } catch {
-    console.log("לא הצלחנו להתחבר לשרת");
+    alert("לא הצלחנו להתחבר לשרת. הדיווח לא נשלח.");
+    return null;
+  }
+}
+
+// טוענים מהשרת את כל הדיווחים מ-48 השעות האחרונות
+async function loadReports() {
+  const code = localStorage.getItem("aegisCode");
+  if (!code) { rebuild(); return; }   // בלי קוד אין גישה לדיווחים
+  try {
+    const result = await callServer("/reports", { code });
+    if (!result.ok) {
+      if (result.error === "קוד שגוי") localStorage.removeItem("aegisCode");
+      return;
+    }
+    reports = result.reports;
+    timeOffset = result.now - Date.now();   // כדי שכל המכשירים יחשבו זמן לפי השעון של השרת
+    rebuild();
+  } catch {
+    console.log("לא הצלחנו לטעון דיווחים מהשרת");
   }
 }
 
@@ -347,6 +351,7 @@ async function joinAlerts() {
       return;
     }
     status.textContent = "מעולה! ההתראות פעילות בטלפון הזה ✓";
+    loadReports();
   } catch (err) {
     status.textContent = "משהו השתבש: " + err.message;
   }
@@ -381,32 +386,47 @@ function openAlertFromLink() {
   const params = new URLSearchParams(window.location.search);
   if (!params.has("type")) return;  // נכנסו לאתר רגיל, לא מהתראה
 
-  const lat = params.has("lat") ? Number(params.get("lat")) : null;
-  const lon = params.has("lon") ? Number(params.get("lon")) : null;
-  // הטקסט מהקישור מוצג בדף, אז הופכים תווים כמו < לטקסט רגיל, כדי שאי אפשר יהיה להכניס דרכו קוד
-  const safe = text => text.replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
-  const id = addAlert(safe(params.get("type")), safe(params.get("place") || "מיקום לא ידוע"), "התראה שהתקבלה בטלפון", lat, lon);
+  // מחפשים את האירוע ברשימה שהגיעה מהשרת לפי המספר שלו
+  const id = Number(params.get("id"));
+  if (!reports.some(r => r.id === id)) {
+    // אם הוא עוד לא ברשימה, בונים אותו מהפרטים שבקישור
+    reports.unshift({
+      id: id || Date.now(),
+      type: params.get("type"),
+      place: params.get("place") || "מיקום לא ידוע",
+      source: "התראה שהתקבלה בטלפון",
+      lat: params.has("lat") ? Number(params.get("lat")) : null,
+      lon: params.has("lon") ? Number(params.get("lon")) : null,
+      time: Date.now() + timeOffset
+    });
+    rebuild();
+  }
 
-  // עוברים לעמוד ההתראות ומסמנים את האירוע. כשהמיקום שלי יזוהה, המפה תראה את שנינו
+  // אם האירוע כבר הסתיים (עברו יותר מ-3 דקות), הוא נמצא בעמוד ההיסטוריה
+  const eventId = id || reports[0].id;
+  if (!alerts.some(a => a.id === eventId)) { showPage("history"); return; }
+
+  // אחרת עוברים לעמוד ההתראות ומסמנים אותו. כשהמיקום שלי יזוהה, המפה תראה את שנינו
   showPage("alerts");
-  selectAlert(id);
+  selectAlert(eventId);
 }
-
 
 // ===================================================
 //  חלק 5: התראות בזמן אמת
 // ===================================================
 
-// מוסיפים התראה לראש הרשימה. age = כמה שניות היא כבר במערכת
-// age = 0 הוא ערך ברירת מחדל: אם לא שולחים אותו, ההתראה חדשה לגמרי
-function addAlert(type, place, source, lat, lon, age = 0) {
-  const id = nextId++;  // לוקחים מספר לאירוע, ומעלים את המונה לאירוע הבא
-
-  // unshift מוסיף לתחילת המערך, כדי שההתראה החדשה תופיע ראשונה
-  alerts.unshift({ id, type, place, source, lat, lon, age, time: new Date(Date.now() - age * 1000) });
-
+// מחלקים את הדיווחים לפעילים ולהיסטוריה, לפי כמה זמן עבר מאז הדיווח
+function rebuild() {
+  const now = Date.now() + timeOffset;
+  alerts = [];
+  history = [];
+  reports.forEach(r => {
+    const age = (now - r.time) / 1000;   // כמה שניות עברו מאז הדיווח
+    if (age < EVENT_LENGTH) alerts.push({ ...r, age, time: new Date(r.time) });
+    else history.push(toHistory(r));
+  });
   renderAlerts();
-  return id;  // מחזירים את המספר, כדי שאפשר יהיה לבחור את ההתראה מיד
+  renderHistory();
 }
 
 // המצב של ההתראה נקבע לפי כמה זמן היא במערכת
@@ -432,10 +452,10 @@ function renderAlerts() {
     html += `
       <div class="alert ${status.cls} ${alert.id === selectedId ? "selected" : ""}" onclick="selectAlert(${alert.id})">
         <div>
-          <h3>${alert.type}</h3>
+          <h3>${safe(alert.type)}</h3>
           <div class="alert-info">
-            <span>מיקום: <b>${alert.place}</b></span>
-            <span>מקור: <b>${alert.source}</b></span>
+            <span>מיקום: <b>${safe(alert.place)}</b></span>
+            <span>מקור: <b>${safe(alert.source)}</b></span>
             <span>מרחק ממך: <b>${distanceFromMe(alert)}</b></span>
             <span>התקבלה: <b>${alert.time.toLocaleTimeString("he-IL")}</b></span>
           </div>
@@ -445,7 +465,10 @@ function renderAlerts() {
   });
 
   // מכניסים את כל הכרטיסים לדף. אם אין התראות, מציגים הודעה
-  document.getElementById("alertsList").innerHTML = html || '<div class="empty">אין כרגע אירועים פעילים. המערכת ממשיכה לנטר.</div>';
+  const emptyText = localStorage.getItem("aegisCode")
+    ? "אין כרגע אירועים פעילים. המערכת ממשיכה לנטר."
+    : "כדי לראות דיווחים צריך להצטרף עם קוד, בקופסה \"קבלת התראות לטלפון\" בעמוד הבית.";
+  document.getElementById("alertsList").innerHTML = html || `<div class="empty">${emptyText}</div>`;
 
   // מעדכנים את המספרים בקופסאות ובתפריט
   document.getElementById("countNew").textContent = counts.new;
@@ -457,49 +480,30 @@ function renderAlerts() {
   drawMap();
 }
 
-// אירוע שהסתיים עובר לראש ההיסטוריה
-function moveToHistory(alert) {
-  const now = new Date();
-
-  // יוצרים רשומה חדשה בהיסטוריה עם כל המידע על האירוע
-  history.unshift({
-    id: alert.id,
-    type: alert.type,
-    place: alert.place,
-    date: now.toLocaleDateString("he-IL"),                       // התאריך של היום
-    start: alert.time.toLocaleTimeString("he-IL").slice(0, 5),  // שעת ההתחלה, רק שעות ודקות
-    end: now.toLocaleTimeString("he-IL").slice(0, 5),           // שעת הסיום
-    minutes: Math.round(EVENT_LENGTH / 60),                     // משך האירוע בדקות
-    sources: alert.source + ", מצלמות באזור",
-    summary: "האירוע אומת וטופל, והציבור קיבל עדכון על סיומו."
-  });
-
-  renderHistory();
+// הופכים דיווח שהסתיים לרשומה בהיסטוריה
+function toHistory(r) {
+  const start = new Date(r.time);
+  const end = new Date(r.time + EVENT_LENGTH * 1000);
+  return {
+    id: r.id,
+    type: r.type,
+    place: r.place,
+    date: start.toLocaleDateString("he-IL"),               // התאריך של הדיווח
+    start: start.toLocaleTimeString("he-IL").slice(0, 5),  // שעת הדיווח, רק שעות ודקות
+    end: end.toLocaleTimeString("he-IL").slice(0, 5),      // השעה שבה האירוע הסתיים
+    minutes: Math.round(EVENT_LENGTH / 60),                // משך האירוע בדקות
+    sources: r.source,
+    summary: "האירוע הסתיים. הוא יימחק מההיסטוריה 48 שעות אחרי הדיווח."
+  };
 }
 
-// רץ כל 5 שניות: ההתראות מתקדמות, ורק אירוע שהסתיים עובר להיסטוריה
+// רץ כל 5 שניות: אירוע שעברו עליו 3 דקות עובר להיסטוריה,
+// וכל 20 שניות טוענים מהשרת דיווחים חדשים של החברים
 function update() {
   rounds++;
-
-  // כל ההתראות "מתבגרות" ב-5 שניות
-  alerts.forEach(alert => alert.age += 5);
-
-  // התראות שעבר עליהן כל הזמן של האירוע עוברות להיסטוריה
-  alerts.filter(alert => alert.age >= EVENT_LENGTH).forEach(moveToHistory);
-
-  // ונמחקות מרשימת ההתראות הפעילות
-  alerts = alerts.filter(alert => alert.age < EVENT_LENGTH);
-
-  // כל 45 שניות (כל 9 סיבובים) נכנסת התראה חדשה
-  if (rounds % 9 === 0) {
-    // בוחרים את ההתראה הבאה מרשימת הדמה, ובסוף הרשימה חוזרים להתחלה
-    const next = incoming[(rounds / 9) % incoming.length];
-    addAlert(next.type, next.place, next.source, next.lat, next.lon);
-  }
-
-  renderAlerts();
+  if (rounds % 4 === 0) loadReports();
+  else rebuild();
 }
-
 
 // ===================================================
 //  חלק 6: היסטוריה
@@ -526,25 +530,26 @@ function renderHistory() {
           <span class="event-id">אירוע #${event.id}</span>
           <span class="ended">הסתיים</span>
         </div>
-        <h3>${event.type}</h3>
-        <div class="event-place">${event.place}</div>
+        <h3>${safe(event.type)}</h3>
+        <div class="event-place">${safe(event.place)}</div>
         <div class="event-table">
           <span>תאריך</span><b>${event.date}</b>
           <span>התחלה</span><b>${event.start}</b>
           <span>סיום</span><b>${event.end}</b>
           <span>משך טיפול</span><b>${event.minutes} דקות</b>
-          <span>אומת על ידי</span><b>${event.sources}</b>
+          <span>מקור הדיווח</span><b>${safe(event.sources)}</b>
         </div>
         <p>${event.summary}</p>
       </div>`;
   });
 
   // מכניסים את הכרטיסים לדף. אם החיפוש לא מצא כלום, מציגים הודעה
-  document.getElementById("historyList").innerHTML = html || '<div class="empty">לא נמצאו אירועים מתאימים לחיפוש.</div>';
+  const emptyText = history.length ? "לא נמצאו אירועים מתאימים לחיפוש." : "עוד אין אירועים שהסתיימו ב-48 השעות האחרונות.";
+  document.getElementById("historyList").innerHTML = html || `<div class="empty">${emptyText}</div>`;
 
   // הסיכום שבראש העמוד: כמה אירועים, וכמה דקות טיפול בממוצע
   document.getElementById("historyTotal").textContent = history.length;
-  document.getElementById("historyAvg").textContent = Math.round(totalMinutes / history.length);
+  document.getElementById("historyAvg").textContent = history.length ? Math.round(totalMinutes / history.length) : 0;
 }
 
 // בכל פעם שמקלידים בתיבת החיפוש, הרשימה מתעדכנת
@@ -561,13 +566,8 @@ function showClock() {
   document.getElementById("clock").textContent = new Date().toLocaleTimeString("he-IL");
 }
 
-// מצב התחלתי: שלוש התראות בשלבים שונים (המספר האחרון הוא כמה שניות הן כבר במערכת)
-addAlert("לחיצה על לחצן מצוקה", "עמוד 4, רחוב יהודה הלוי, טבריה", "עמוד מצוקה", 32.7896, 35.5340, 120);
-addAlert("חשד לאירוע ירי", "שדרות רבין, עפולה", "מצלמה חכמה", 32.6075, 35.2920, 40);
-addAlert("חשד לפיגוע דריסה", "תחנה מרכזית, נוף הגליל", "דיווח אזרח", 32.7046, 35.3245, 0);
-
-// אם נכנסו מהקישור שבהתראה, מציגים את האירוע
-openAlertFromLink();
+// טוענים את הדיווחים מהשרת, ואם נכנסו מהקישור שבהתראה מציגים את האירוע
+loadReports().then(openAlertFromLink);
 
 // מכינים את ההתראות, ואם הטלפון כבר רשום מעדכנים בשרת את המיקום
 prepareNotifications().then(refreshMyLocation);
@@ -575,7 +575,6 @@ prepareNotifications().then(refreshMyLocation);
 // מזהים את המיקום שלי, כדי להציג אותו על המפה ולחשב מרחקים
 navigator.geolocation.getCurrentPosition(savePosition);
 
-renderHistory();              // מציגים את ההיסטוריה
 showClock();                  // מציגים את השעון מיד
 setInterval(showClock, 1000); // ומעדכנים אותו כל שנייה
 setInterval(update, 5000);    // ההתראות מתעדכנות כל 5 שניות
