@@ -70,13 +70,9 @@ let selectedId = null;  // ההתראה שנבחרה ומוצגת על המפה
 
 const EVENT_LENGTH = 180;  // כמה שניות אירוע נשאר פעיל עד שהוא מסתיים (3 דקות)
 
-// ---------- הגדרות להתראה לטלפון (ntfy) ----------
-// שם "הערוץ" שאליו נשלחות ההתראות. רק מי שנרשם לשם הזה באפליקציית ntfy יקבל אותן,
-// לכן כדאי לבחור שם ארוך שאף אחד לא ינחש
-const NTFY_TOPIC = "aegis-naama-7f3k9q";
-
-// הכתובת של האתר באינטרנט (למשל ב-GitHub Pages). לחיצה על ההתראה בטלפון פותחת את הכתובת הזאת
-const SITE_URL = "https://naamaelbaz4-afk.github.io/aegis/";
+// ---------- הגדרות השרת ----------
+// הכתובת של השרת שלנו ב-Cloudflare (מעתיקים אותה מדף ה-Worker אחרי שיוצרים אותו)
+const SERVER_URL = "https://aegis-server.naamaelbaz4.workers.dev";
 
 
 // ===================================================
@@ -261,33 +257,123 @@ function pressSOS() {
   selectAlert(id);
 }
 
-// שולחים התראה לטלפון דרך השירות ntfy (חינם, בלי הרשמה ובלי שרת משלנו)
-// בהתראה יש קישור לאתר, ובקישור נמצאים כל פרטי האירוע: סוג, מקום ומיקום על המפה
-function notifyPhone(type, place, lat, lon) {
+// ---------- התראות לטלפון דרך השרת שלנו ----------
+
+// הקוד הסודי נשמר בדפדפן, כדי שלא צריך להקליד אותו כל פעם
+function getCode() {
+  let code = localStorage.getItem("aegisCode");
+  if (!code) {
+    code = prompt("כדי לדווח צריך את קוד ההצטרפות:");
+    if (code) localStorage.setItem("aegisCode", code.trim());
+  }
+  return code ? code.trim() : null;
+}
+
+// שולחים בקשה לשרת עם הקוד הסודי, ומחזירים את התשובה
+async function callServer(path, data) {
+  const response = await fetch(SERVER_URL + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  return response.json();
+}
+
+// שולחים את הדיווח לשרת. השרת מחליט מי בטווח ושולח לו התראה
+async function notifyPhone(type, place, lat, lon) {
+  const code = getCode();
+  if (!code) return;
+
   // מורידים תגיות HTML מהמקום (למשל <small> של רמת הדיוק), כי בהתראה יש רק טקסט
   const cleanPlace = place.replace(/<[^>]*>/g, "").trim();
 
-  // בונים את הקישור: הכתובת של האתר ועוד הפרטים של האירוע אחרי סימן השאלה
-  const params = new URLSearchParams({ type: type, place: cleanPlace });
-  if (lat != null) {
-    params.set("lat", lat.toFixed(5));
-    params.set("lon", lon.toFixed(5));
+  try {
+    const result = await callServer("/report", { code, type, place: cleanPlace, lat, lon });
+    if (result.ok) console.log("ההתראה נשלחה ל-" + result.sent + " טלפונים");
+    else {
+      alert("השרת לא קיבל את הדיווח: " + result.error);
+      if (result.error === "קוד שגוי") localStorage.removeItem("aegisCode");
+    }
+  } catch {
+    console.log("לא הצלחנו להתחבר לשרת");
   }
-  const link = SITE_URL + "?" + params.toString();
+}
 
-  // שולחים את ההתראה לשרת של ntfy, והוא מעביר אותה לכל טלפון שרשום לערוץ
-  fetch("https://ntfy.sh/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      topic: NTFY_TOPIC,
-      title: "AEGIS: התראה באזורך",
-      message: type + " · " + cleanPlace + "\nלחצו כדי לראות על המפה איפה האירוע ואיפה אתם.",
-      tags: ["rotating_light"],  // אייקון של צופר משטרה בהתראה
-      priority: 5,               // עדיפות הכי גבוהה: ההתראה מצלצלת וקופצת על המסך
-      click: link                // מה נפתח כשלוחצים על ההתראה
-    })
-  }).catch(() => console.log("לא הצלחנו לשלוח התראה לטלפון"));
+// מכינים מראש את ה-Service Worker ואת המפתח של השרת,
+// כי באייפון ההרשמה חייבת לקרות מיד כשלוחצים על הכפתור, בלי לחכות לאינטרנט
+let swRegistration = null;
+let serverKey = null;
+async function prepareNotifications() {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+  try {
+    swRegistration = await navigator.serviceWorker.register("sw.js");
+    serverKey = (await (await fetch(SERVER_URL + "/key")).json()).key;
+  } catch {
+    console.log("לא הצלחנו להכין את ההתראות");
+  }
+}
+
+// כפתור "הפעלת התראות": נרשמים לקבלת התראות מהשרת
+async function joinAlerts() {
+  const status = document.getElementById("joinStatus");
+  const code = document.getElementById("joinCode").value.trim() || localStorage.getItem("aegisCode");
+  if (!code) { status.textContent = "צריך להכניס את קוד ההצטרפות."; return; }
+
+  // בודקים שהדפדפן תומך בהתראות. באייפון צריך קודם להוסיף את האתר למסך הבית
+  if (!swRegistration || !serverKey) {
+    status.textContent = "אי אפשר להפעיל התראות כאן. באייפון: שיתוף ← הוספה למסך הבית, ולפתוח את AEGIS משם.";
+    return;
+  }
+
+  try {
+    // 1. מבקשים רשות להציג התראות
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") { status.textContent = "צריך לאשר התראות כדי לקבל אותן."; return; }
+
+    // 2. נרשמים להתראות עם המפתח הציבורי של השרת
+    const subscription = await swRegistration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: serverKey
+    });
+
+    // 3. בודקים את הקוד ושולחים לשרת את פרטי ההרשמה ואת המיקום
+    status.textContent = "בודקים את הקוד...";
+    localStorage.setItem("aegisCode", code);
+    const result = await sendMyDetails(subscription);
+    if (!result || !result.ok) {
+      localStorage.removeItem("aegisCode");
+      await subscription.unsubscribe();
+      status.textContent = "הקוד לא נכון.";
+      return;
+    }
+    status.textContent = "מעולה! ההתראות פעילות בטלפון הזה ✓";
+  } catch (err) {
+    status.textContent = "משהו השתבש: " + err.message;
+  }
+}
+
+// שולחים לשרת את פרטי ההרשמה ואת המיקום העדכני
+function sendMyDetails(subscription) {
+  const code = localStorage.getItem("aegisCode");
+  return new Promise(resolve => {
+    const send = (lat, lon) =>
+      callServer("/subscribe", { code, subscription: subscription.toJSON(), lat, lon }).then(resolve, () => resolve(null));
+    navigator.geolocation.getCurrentPosition(
+      position => send(position.coords.latitude, position.coords.longitude),
+      () => send(null, null),   // אם אין מיקום, נרשמים בלי מיקום ומקבלים את כל ההתראות
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  });
+}
+
+// בכל פעם שפותחים את האפליקציה: מעדכנים בשרת את המיקום, כדי שהסינון לפי מרחק יהיה מדויק
+async function refreshMyLocation() {
+  if (!("serviceWorker" in navigator) || !localStorage.getItem("aegisCode")) return;
+  const subscription = swRegistration && await swRegistration.pushManager.getSubscription();
+  if (subscription) {
+    sendMyDetails(subscription);
+    document.getElementById("joinStatus").textContent = "ההתראות פעילות בטלפון הזה ✓";
+  }
 }
 
 // כשנכנסים לאתר מהקישור שבהתראה: מציגים את האירוע מהקישור על המפה
@@ -482,6 +568,9 @@ addAlert("חשד לפיגוע דריסה", "תחנה מרכזית, נוף הגל
 
 // אם נכנסו מהקישור שבהתראה, מציגים את האירוע
 openAlertFromLink();
+
+// מכינים את ההתראות, ואם הטלפון כבר רשום מעדכנים בשרת את המיקום
+prepareNotifications().then(refreshMyLocation);
 
 // מזהים את המיקום שלי, כדי להציג אותו על המפה ולחשב מרחקים
 navigator.geolocation.getCurrentPosition(savePosition);

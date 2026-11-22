@@ -17,6 +17,13 @@
 
   <!-- קישור לקובץ העיצוב -->
   <link rel="stylesheet" href="FinalProject1.css">
+
+  <!-- הגדרות שהופכות את האתר לאפליקציה שאפשר להוסיף למסך הבית -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0f1e">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="AEGIS">
 </head>
 <body>
 
@@ -112,6 +119,18 @@
           </select>
           <!-- הכפתור: מזהה את המיקום ושולח את הדיווח (הפונקציה sendReport ב-script.js) -->
           <button id="reportBtn" class="btn btn-primary" onclick="sendReport()">דיווח על פיגוע</button>
+        </div>
+      </div>
+
+      <!-- הצטרפות להתראות: רק מי שיש לו את הקוד הסודי יכול להצטרף -->
+      <div class="report" style="margin-top: 20px;">
+        <div>
+          <h2>קבלת התראות לטלפון</h2>
+          <p id="joinStatus">מכניסים את קוד ההצטרפות ומאשרים התראות ומיקום. ההתראות מגיעות רק כשאירוע קורה בטווח של 10 ק״מ ממך.</p>
+        </div>
+        <div class="report-form">
+          <input id="joinCode" class="field" type="password" placeholder="קוד הצטרפות">
+          <button id="joinBtn" class="btn btn-ghost" onclick="joinAlerts()">הפעלת התראות</button>
         </div>
       </div>
 
