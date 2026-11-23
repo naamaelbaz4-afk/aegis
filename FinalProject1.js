@@ -156,8 +156,8 @@ function savePosition(position) {
 
 // כפתור הדיווח בעמוד הבית: מזהה לבד את המיקום של המדווח
 function sendReport() {
-  // סוג האירוע שנבחר ברשימה
-  const type = document.getElementById("reportType").value;
+   // אין בחירה של סוג אירוע: כל דיווח נשלח בשם אחד
+  const type = "דיווח על פיגוע";
 
   // משנים את הטקסט של הכפתור, כדי שהמשתמש יידע שמשהו קורה
   document.getElementById("reportBtn").textContent = "מאתר את המיקום שלך...";
