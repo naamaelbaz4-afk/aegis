@@ -183,11 +183,11 @@ async function finishReport(type, lat, lon) {
 
   if (lat != null) {
     document.getElementById("reportBtn").textContent = "מאתר את הכתובת...";
-    // מחכים לכתובת, ומוסיפים לידה את רמת הדיוק
-    place = await getAddress(lat, lon) + ` <small>(דיוק של כ־${myPos.accuracy} מטר)</small>`;
+    // מחכים לכתובת (רחוב ועיר)
+    place = await getAddress(lat, lon);
   }
 
-  // שולחים את הדיווח לשרת. השרת שומר אותו ושולח התראה לכל מי שבטווח
+  // שולחים את הדיווח לשרת. השרת שומר אותו ושולח התראה לכל המשתמשים
   document.getElementById("reportBtn").textContent = "שולח את הדיווח...";
   const report = await notifyPhone(type, place, lat, lon, "דיווח מהאתר");
 
@@ -257,7 +257,7 @@ async function callServer(path, data) {
   return response.json();
 }
 
-// שולחים את הדיווח לשרת. השרת שומר אותו, מחליט מי בטווח ושולח לו התראה
+// שולחים את הדיווח לשרת. השרת שומר אותו ושולח התראה לכל המשתמשים
 // מחזירים את הדיווח כפי שנשמר בשרת (עם מספר אירוע ושעה), או null אם נכשל
 async function notifyPhone(type, place, lat, lon, source) {
   const code = getCode();
@@ -421,6 +421,8 @@ function rebuild() {
   alerts = [];
   history = [];
   reports.forEach(r => {
+    // בדיווחים ישנים נשמר גם "(דיוק של כ־X מטר)" ליד הכתובת. מורידים אותו מהתצוגה
+    r = { ...r, place: String(r.place).replace(/\s*\(דיוק של[^)]*\)/, "") };
     const age = (now - r.time) / 1000;   // כמה שניות עברו מאז הדיווח
     if (age < EVENT_LENGTH) alerts.push({ ...r, age, time: new Date(r.time) });
     else history.push(toHistory(r));
