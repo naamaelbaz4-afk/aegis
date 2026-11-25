@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- הדף בעברית, והכיוון שלו מימין לשמאל -->
+<html lang="he" dir="rtl">
+<head>
+  <!-- מאפשר להציג עברית ותווים מיוחדים -->
+  <meta charset="UTF-8">
+  <!-- מתאים את הדף לגודל המסך, גם בטלפון -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- השם שמופיע בלשונית של הדפדפן -->
+  <title>PLUMERA | היסטוריה</title>
+
+  <!-- גופן עברי מ-Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- קישור לקובץ העיצוב (משותף לכל ארבעת העמודים) -->
+  <link rel="stylesheet" href="FinalProject1.css">
+
+  <!-- הגדרות שהופכות את האתר לאפליקציה שאפשר להוסיף למסך הבית -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#080b09">
+  <link rel="icon" href="flower.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLUMERA">
+</head>
+<!-- data-page אומר לקובץ ה-JS באיזה עמוד אנחנו -->
+<body data-page="history">
+
+  <!-- ========== סרגל עליון וניווט (זהה בכל העמודים) ========== -->
+  <header class="topbar">
+    <!-- הלוגו: לחיצה עליו מחזירה לעמוד הבית -->
+    <a class="logo" href="index.html">
+      <img class="logo-icon" src="flower.svg" alt="">
+      <div>
+        <strong>PLUMERA</strong>
+        <small>מערכת הגנה והתראה חכמה</small>
+      </div>
+    </a>
+
+    <!-- התפריט: כל קישור פותח עמוד אחר. העמוד הנוכחי מסומן ב-active -->
+    <nav class="nav">
+      <a class="nav-btn" href="index.html">בית</a>
+      <a class="nav-btn" href="alerts.html">התראות בזמן אמת <span class="badge" id="navCount">0</span> <!-- מספר ההתראות הפעילות --></a>
+      <a class="nav-btn" href="about.html">אודות</a>
+      <a class="nav-btn active" href="history.html">היסטוריה</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <!-- ========== עמוד היסטוריה ========== -->
+    <div class="page-head">
+      <div>
+        <h1>היסטוריית אירועים</h1>
+        <p>כל האירועים שהסתיימו ב-48 השעות האחרונות.</p>
+      </div>
+      <!-- תיבת חיפוש: הרשימה מסתננת בזמן ההקלדה -->
+      <input id="search" class="field search" type="text" placeholder="חיפוש לפי עיר, סוג אירוע...">
+    </div>
+
+    <!-- הערה שמסבירה כמה זמן אירועים נשמרים -->
+    <div class="demo-note">אירועים נשמרים כאן 48 שעות מרגע הדיווח, ואז נמחקים.</div>
+
+    <!-- סיכום: כמה אירועים וכמה דקות טיפול בממוצע. מחושב ב-FinalProject1.js -->
+    <div class="summary">
+      <div class="sum"><b id="historyTotal">0</b><span>אירועים שהסתיימו</span></div>
+      <div class="sum"><b id="historyAvg">0</b><span>דקות טיפול בממוצע</span></div>
+    </div>
+
+    <!-- רשימת האירועים: FinalProject1.js בונה כאן את הכרטיסים -->
+    <div id="historyList" class="history-list"></div>
+  </main>
+
+  <!-- תחתית האתר (זהה בכל העמודים) -->
+  <footer class="footer">
+    <b>PLUMERA</b> · <span dir="ltr">One Network. One Mission. Saving Lives.</span><br>
+    רשת אחת. מטרה אחת. הצלת חיים. · פרויקט גמר של נעמה אלבז · תשפ״ז
+  </footer>
+
+  <!-- קובץ ה-JavaScript שלנו. תמיד בסוף הדף -->
+  <script src="FinalProject1.js"></script>
+</body>
+</html>

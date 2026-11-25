@@ -6,7 +6,7 @@
 // כשמגיעה התראה מהשרת
 self.addEventListener("push", event => {
   // התוכן שהשרת שלח: כותרת, טקסט וקישור
-  let data = { title: "AEGIS", body: "התקבלה התראה חדשה", url: "./" };
+  let data = { title: "PLUMERA", body: "התקבלה התראה חדשה", url: "./" };
   try { data = event.data.json(); } catch (e) { }
 
   // מציגים את ההתראה על המסך

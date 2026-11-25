@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!-- הדף בעברית, והכיוון שלו מימין לשמאל -->
+<html lang="he" dir="rtl">
+<head>
+  <!-- מאפשר להציג עברית ותווים מיוחדים -->
+  <meta charset="UTF-8">
+  <!-- מתאים את הדף לגודל המסך, גם בטלפון -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- השם שמופיע בלשונית של הדפדפן -->
+  <title>PLUMERA | אודות</title>
+
+  <!-- גופן עברי מ-Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- קישור לקובץ העיצוב (משותף לכל ארבעת העמודים) -->
+  <link rel="stylesheet" href="FinalProject1.css">
+
+  <!-- הגדרות שהופכות את האתר לאפליקציה שאפשר להוסיף למסך הבית -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#080b09">
+  <link rel="icon" href="flower.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLUMERA">
+</head>
+<!-- data-page אומר לקובץ ה-JS באיזה עמוד אנחנו -->
+<body data-page="about">
+
+  <!-- ========== סרגל עליון וניווט (זהה בכל העמודים) ========== -->
+  <header class="topbar">
+    <!-- הלוגו: לחיצה עליו מחזירה לעמוד הבית -->
+    <a class="logo" href="index.html">
+      <img class="logo-icon" src="flower.svg" alt="">
+      <div>
+        <strong>PLUMERA</strong>
+        <small>מערכת הגנה והתראה חכמה</small>
+      </div>
+    </a>
+
+    <!-- התפריט: כל קישור פותח עמוד אחר. העמוד הנוכחי מסומן ב-active -->
+    <nav class="nav">
+      <a class="nav-btn" href="index.html">בית</a>
+      <a class="nav-btn" href="alerts.html">התראות בזמן אמת <span class="badge" id="navCount">0</span> <!-- מספר ההתראות הפעילות --></a>
+      <a class="nav-btn active" href="about.html">אודות</a>
+      <a class="nav-btn" href="history.html">היסטוריה</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <!-- ========== עמוד אודות ========== -->
+    <div class="page-head">
+      <div>
+        <h1>אודות הפרויקט</h1>
+        <p>מה זה, איך זה עובד, ואיך זה עוזר לאזרחי המדינה.</p>
+      </div>
+    </div>
+
+    <!-- הסבר כללי על הפרויקט -->
+    <div class="about-intro card">
+      <img class="about-flower" src="flower.svg" alt="">
+      <div>
+        <h2>מה זה PLUMERA?</h2>
+        <p>
+          השם לקוח מפרח הפלומריה: פרח עמיד, שחמשת עלי הכותרת שלו יוצאים ממרכז אחד.
+          כך גם המערכת: הרבה מקורות מידע שמתחברים למרכז אחד, עם מטרה אחת, להציל חיים.
+          המערכת מתריעה בזמן אמת על פיגועים במרחב הציבורי, כמו דקירה, ירי ודריסה.
+          היא אוספת מידע משלושה מקורות, מאמתת אותו, ורק אז שולחת התראה לכל המשתמשים.
+          הלב של הפרויקט הוא עמוד מצוקה חכם שמותקן על עמודי חשמל ותאורה ברחוב.
+        </p>
+      </div>
+    </div>
+
+    <!-- שלושה כרטיסים: למי המערכת עוזרת -->
+    <h2 class="section-title">איך המערכת עוזרת לאזרחים</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="icon blue">1</div>
+        <h3>כלל הציבור</h3>
+        <p>כל המשתמשים מקבלים התראה מיד, ויודעים לאן לא ללכת.</p>
+      </div>
+      <div class="card">
+        <div class="icon red">2</div>
+        <h3>מגיבים ראשונים</h3>
+        <p>אזרחים חמושים וכוחות הצלה יודעים בדיוק לאן להגיע, בלי לחפש.</p>
+      </div>
+      <div class="card">
+        <div class="icon green">3</div>
+        <h3>עדי ראייה</h3>
+        <p>כל מי שנמצא ברחוב יכול לדווח בלחיצה אחת, גם בלי טלפון ביד.</p>
+      </div>
+    </div>
+
+    <!-- שרטוט: שלושת המקורות, האימות וההתראה לציבור -->
+    <h2 class="section-title">שלושה מקורות מידע, החלטה אחת</h2>
+    <div class="flow">
+      <div class="flow-sources">
+        <div class="flow-box">מצלמות חכמות<small>מזהות התנהגות חריגה, למשל אנשים שבורחים</small></div>
+        <div class="flow-box">דיווחי אזרחים<small>מהאפליקציה, עם מיקום ושעה</small></div>
+        <div class="flow-box">עמודי מצוקה<small>לחיצה על הלחצן שולחת את מיקום העמוד</small></div>
+      </div>
+      <div class="flow-arrow">←</div>
+      <div class="flow-box main">אימות<small>האם כמה מקורות מאשרים?</small></div>
+      <div class="flow-arrow">←</div>
+      <div class="flow-box final">התראה לציבור<small>לכל המשתמשים</small></div>
+    </div>
+
+    <!-- כרטיס לכל אחד מששת הרכיבים -->
+    <h2 class="section-title">ממה בנוי עמוד המצוקה</h2>
+    <div class="grid">
+      <div class="card part"><h3>בקר ראשי</h3><p>המוח של העמוד. קורא את הלחצן, מפעיל את שאר הרכיבים ושולח התראה לשרת דרך הרשת האלחוטית.</p></div>
+      <div class="card part"><h3>לחצן מצוקה</h3><p>לחצן פשוט ואמין עם שני מצבים בלבד. לחיצה עליו מתחילה את כל התהליך.</p></div>
+      <div class="card part"><h3>מסך קטן</h3><p>מציג את מצב העמוד, למשל שהמערכת תקינה או שהתראה נשלחה.</p></div>
+      <div class="card part"><h3>זמזם</h3><p>משמיע צפירה שעולה ויורדת, כדי שכל הסביבה תשמע שקורה משהו.</p></div>
+      <div class="card part"><h3>מצלמה</h3><p>יחידה עצמאית שמצלמת את האזור, כדי שהמוקד יראה אם האירוע אמיתי.</p></div>
+      <div class="card part"><h3>נורית חיווי</h3><p>כבויה במצב רגיל, מהבהבת כשנשלחה התראה, ודולקת קבוע כשכוחות בדרך.</p></div>
+    </div>
+
+    <!-- השיפורים העתידיים: ארבעה כרטיסים, באותו עיצוב כמו שאר הכרטיסים באתר -->
+    <h2 class="section-title">השלב הבא של PLUMERA</h2>
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="icon blue">◎</div>
+        <h3>מקלט מיקום</h3>
+        <p>כל עמוד ישלח בעצמו את המיקום המדויק שלו, בלי להגדיר אותו מראש.</p>
+      </div>
+      <div class="card">
+        <div class="icon amber">ϟ</div>
+        <h3>סוללה נטענת</h3>
+        <p>העמוד ימשיך לעבוד גם בהפסקת חשמל, בדיוק כשהכי צריך אותו.</p>
+      </div>
+      <div class="card">
+        <div class="icon green">▣</div>
+        <h3>קופסה מודפסת</h3>
+        <p>מארז מודפס בתלת מימד, שמגן על הרכיבים מגשם, מאבק וממכות.</p>
+      </div>
+      <div class="card">
+        <div class="icon red">◈</div>
+        <h3>שרת מרכזי</h3>
+        <p>מקום אחד שמאחד את המצלמות, האפליקציה והעמודים, ומאמת אירועים לבד.</p>
+      </div>
+    </div>
+
+    <!-- פרטי ההגשה -->
+    <div class="credits card">
+      <div><small>מגישה</small><b>נעמה אלבז</b></div>
+      <div><small>מנחה הפרויקט</small><b>שאלתיאל יעיש</b></div>
+      <div><small>רכז המגמה</small><b>מאור צבעוני</b></div>
+      <div><small>מסלול</small><b>הנדסאי תקשוב וסייבר, התמחות IoT</b></div>
+      <div><small>שנת לימודים</small><b>תשפ״ז</b></div>
+    </div>
+  </main>
+
+  <!-- תחתית האתר (זהה בכל העמודים) -->
+  <footer class="footer">
+    <b>PLUMERA</b> · <span dir="ltr">One Network. One Mission. Saving Lives.</span><br>
+    רשת אחת. מטרה אחת. הצלת חיים. · פרויקט גמר של נעמה אלבז · תשפ״ז
+  </footer>
+
+  <!-- קובץ ה-JavaScript שלנו. תמיד בסוף הדף -->
+  <script src="FinalProject1.js"></script>
+</body>
+</html>

@@ -1,29 +1,33 @@
 // ===================================================
-//  חלק 1: מעבר בין העמודים
-//  כל ארבעת העמודים נמצאים באותו קובץ HTML.
-//  הקוד מסתיר את כולם ומציג רק את העמוד שנבחר.
+//  חלק 1: העמודים
+//  לכל עמוד יש קובץ HTML משלו: index (בית), alerts (התראות),
+//  about (אודות) ו-history (היסטוריה). כולם משתמשים בקובץ JS הזה.
 // ===================================================
 
-// פונקציה שמקבלת שם של עמוד (home / alerts / about / history) ומציגה אותו
-function showPage(id) {
-  // עוברים על כל העמודים: לעמוד שנבחר מוסיפים את המחלקה active (מוצג), ומהשאר מורידים אותה (מוסתרים)
-  document.querySelectorAll(".page").forEach(page => page.classList.toggle("active", page.id === id));
+// באיזה עמוד אנחנו עכשיו: כתוב ב-data-page של ה-body בכל קובץ HTML
+const PAGE = document.body.dataset.page;
 
-  // אותו דבר לכפתורים בתפריט: הכפתור של העמוד הנוכחי מסומן
-  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.page === id));
-
-  // גוללים לראש הדף
-  window.scrollTo(0, 0);
-
-  // המפה צריכה לחשב מחדש את הגודל שלה כשהעמוד שלה מופיע, אחרת היא נראית שבורה
-  if (id === "alerts") map.invalidateSize();
+// מעבר לעמוד אחר באתר, למשל goTo("alerts") פותח את alerts.html
+function goTo(page, search = "") {
+  location.href = page + ".html" + search;
 }
 
-// כל אלמנט ב-HTML עם data-page (כפתורי התפריט, הלוגו, כפתורים בעמוד הבית)
-// מקבל אירוע לחיצה שמעביר לעמוד שכתוב בו
-document.querySelectorAll("[data-page]").forEach(element => {
-  element.onclick = () => showPage(element.dataset.page);
-});
+// הקישור שבהתראה בטלפון פותח את האתר עם מספר האירוע.
+// אם הוא נפתח בעמוד הבית, עוברים מיד לעמוד ההתראות עם אותם פרטים
+if (PAGE === "home" && new URLSearchParams(location.search).has("id")) {
+  location.replace("alerts.html" + location.search);
+}
+
+// לא כל האלמנטים נמצאים בכל עמוד (למשל המפה נמצאת רק בעמוד ההתראות),
+// אז משנים טקסט רק אם האלמנט קיים בעמוד הנוכחי
+function setText(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.textContent = value;
+}
+function setHTML(id, value) {
+  const element = document.getElementById(id);
+  if (element) element.innerHTML = value;
+}
 
 
 // ===================================================
@@ -58,29 +62,38 @@ const SERVER_URL = "https://aegis-server.naamaelbaz4.workers.dev";
 //  חלק 3: המפה (Leaflet + OpenStreetMap, חינם ובלי מפתח)
 // ===================================================
 
-// יוצרים מפה בתוך ה-div שה-id שלו הוא map, וממקמים אותה על צפון הארץ בזום 10
-const map = L.map("map").setView([32.7, 35.4], 10);
+// המפה נמצאת רק בעמוד ההתראות. בשאר העמודים map נשאר null
+let map = null;
+let markers = null;
 
-// המפה של OpenStreetMap: חינמית ולא צריכה מפתח. הצבעים הכהים מגיעים מ-CSS
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap",  // הקרדיט שחייבים להציג למפה
-  maxZoom: 19                      // כמה אפשר להתקרב
-}).addTo(map);
+if (document.getElementById("map")) {
+  // יוצרים מפה בתוך ה-div שה-id שלו הוא map, וממקמים אותה על צפון הארץ בזום 10
+  map = L.map("map").setView([32.7, 35.4], 10);
 
-// שכבה שמחזיקה את כל הנקודות שעל המפה, כדי שנוכל למחוק ולצייר אותן מחדש
-const markers = L.layerGroup().addTo(map);
+  // המפה של OpenStreetMap: חינמית ולא צריכה מפתח
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap",  // הקרדיט שחייבים להציג למפה
+    maxZoom: 19                      // כמה אפשר להתקרב
+  }).addTo(map);
+
+  // שכבה שמחזיקה את כל הנקודות שעל המפה, כדי שנוכל למחוק ולצייר אותן מחדש
+  markers = L.layerGroup().addTo(map);
+}
 
 // הצבע של כל נקודה לפי מצב ההתראה: אדום, צהוב או כחול
-const colors = { new: "#ff3d57", checking: "#ffb627", confirmed: "#4c8dff" };
+const colors = { new: "#e5484d", checking: "#e09b00", confirmed: "#3b7dd8" };
 
 // מציירים על המפה את כל ההתראות ואת המיקום שלי
 function drawMap() {
+  // אם אין מפה בעמוד הזה, אין מה לצייר
+  if (!map) return;
+
   // מוחקים את כל הנקודות הישנות
   markers.clearLayers();
 
   // אם המיקום שלי ידוע: נקודה ירוקה עם הכיתוב "אני כאן"
   if (myPos) {
-    L.circleMarker([myPos.lat, myPos.lon], { radius: 8, color: "white", weight: 2, fillColor: "#2ecc71", fillOpacity: 1 })
+    L.circleMarker([myPos.lat, myPos.lon], { radius: 8, color: "white", weight: 2, fillColor: "#2f9e5b", fillOpacity: 1 })
       .bindTooltip("אני כאן", { permanent: true, direction: "bottom" })
       .addTo(markers);
   }
@@ -111,7 +124,7 @@ function selectAlert(id) {
   // מוצאים את ההתראה לפי המספר שלה
   const alert = alerts.find(a => a.id === id);
 
-  if (alert && alert.lat != null) {
+  if (map && alert && alert.lat != null) {
     // הנקודות שהמפה צריכה להראות: האירוע, ואם המיקום שלי ידוע, גם אני
     const points = [[alert.lat, alert.lon]];
     if (myPos) points.push([myPos.lat, myPos.lon]);
@@ -129,8 +142,11 @@ function distanceFromMe(alert) {
   // אם המיקום שלי או של האירוע לא ידוע, אי אפשר לחשב
   if (!myPos || alert.lat == null) return "לא ידוע";
 
-  // Leaflet מחשבת את המרחק במטרים, ומחלקים ב-1000 כדי לקבל קילומטרים
-  const km = map.distance([myPos.lat, myPos.lon], [alert.lat, alert.lon]) / 1000;
+  // המרחק בקילומטרים לפי נוסחת Haversine (מרחק על פני כדור הארץ)
+  const rad = d => d * Math.PI / 180;
+  const a = Math.sin(rad(alert.lat - myPos.lat) / 2) ** 2 +
+            Math.cos(rad(myPos.lat)) * Math.cos(rad(alert.lat)) * Math.sin(rad(alert.lon - myPos.lon) / 2) ** 2;
+  const km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   // פחות מ-100 מטר נחשב "במקום". אחרת מציגים מספר עם ספרה אחת אחרי הנקודה
   return km < 0.1 ? "במקום" : km.toFixed(1) + " ק״מ";
@@ -193,11 +209,10 @@ async function finishReport(type, lat, lon) {
   document.getElementById("reportBtn").textContent = "שולח את הדיווח...";
   const report = await notifyPhone(type, place, lat, lon, "דיווח מהאתר");
 
-  // מחזירים את הכפתור למצב הרגיל, עוברים לעמוד ההתראות ומראים את הדיווח על המפה
+  // מחזירים את הכפתור למצב הרגיל, ועוברים לעמוד ההתראות עם מספר הדיווח, כדי שיופיע על המפה
   document.getElementById("reportBtn").textContent = "דיווח על פיגוע";
   if (!report) return;
-  showPage("alerts");
-  selectAlert(report.id);
+  goTo("alerts", "?id=" + report.id);
 }
 
 // הופכים קואורדינטות לכתובת (רחוב ועיר) בעזרת OpenStreetMap, חינם ובלי מפתח
@@ -226,15 +241,6 @@ async function getAddress(lat, lon) {
     // אם אין אינטרנט או שהשירות לא ענה, מציגים קואורדינטות
     return `<span dir="ltr">${lat.toFixed(4)}, ${lon.toFixed(4)}</span>`;
   }
-}
-
-// לחיצה על כפתור SOS באיור, בדיוק כמו בעמוד המצוקה האמיתי
-// לעמוד יש מיקום קבוע, אז לא צריך לזהות מיקום
-async function pressSOS() {
-  const report = await notifyPhone("לחיצה על לחצן מצוקה", "עמוד 12, רחוב הגליל, טבריה", 32.7880, 35.5380, "עמוד מצוקה");
-  if (!report) return;
-  showPage("alerts");
-  selectAlert(report.id);
 }
 
 // ---------- התראות לטלפון דרך השרת שלנו ----------
@@ -327,7 +333,7 @@ async function joinAlerts() {
 
   // בודקים שהדפדפן תומך בהתראות. באייפון צריך קודם להוסיף את האתר למסך הבית
   if (!swRegistration || !serverKey) {
-    status.textContent = "אי אפשר להפעיל התראות כאן. באייפון: שיתוף ← הוספה למסך הבית, ולפתוח את AEGIS משם.";
+    status.textContent = "אי אפשר להפעיל התראות כאן. באייפון: שיתוף ← הוספה למסך הבית, ולפתוח את PLUMERA משם.";
     return;
   }
 
@@ -379,14 +385,14 @@ async function refreshMyLocation() {
   const subscription = swRegistration && await swRegistration.pushManager.getSubscription();
   if (subscription) {
     sendMyDetails(subscription);
-    document.getElementById("joinStatus").textContent = "ההתראות פעילות בטלפון הזה ✓";
+    setText("joinStatus", "ההתראות פעילות בטלפון הזה ✓");
   }
 }
 
 // כשנכנסים לאתר מהקישור שבהתראה: מציגים את האירוע מהקישור על המפה
 function openAlertFromLink() {
   const params = new URLSearchParams(window.location.search);
-  if (!params.has("type")) return;  // נכנסו לאתר רגיל, לא מהתראה
+  if (!params.has("id")) return;  // נכנסו לעמוד רגיל, לא מהתראה או מדיווח
 
   // מחפשים את האירוע ברשימה שהגיעה מהשרת לפי המספר שלו
   const id = Number(params.get("id"));
@@ -394,7 +400,7 @@ function openAlertFromLink() {
     // אם הוא עוד לא ברשימה, בונים אותו מהפרטים שבקישור
     reports.unshift({
       id: id || Date.now(),
-      type: params.get("type"),
+      type: params.get("type") || "דיווח על פיגוע",
       place: params.get("place") || "מיקום לא ידוע",
       source: "התראה שהתקבלה בטלפון",
       lat: params.has("lat") ? Number(params.get("lat")) : null,
@@ -406,10 +412,9 @@ function openAlertFromLink() {
 
   // אם האירוע כבר הסתיים (עברו יותר מ-3 דקות), הוא נמצא בעמוד ההיסטוריה
   const eventId = id || reports[0].id;
-  if (!alerts.some(a => a.id === eventId)) { showPage("history"); return; }
+  if (!alerts.some(a => a.id === eventId)) { location.replace("history.html"); return; }
 
-  // אחרת עוברים לעמוד ההתראות ומסמנים אותו. כשהמיקום שלי יזוהה, המפה תראה את שנינו
-  showPage("alerts");
+  // אחרת מסמנים אותו על המפה. כשהמיקום שלי יזוהה, המפה תראה את שנינו
   selectAlert(eventId);
 }
 
@@ -472,13 +477,13 @@ function renderAlerts() {
   const emptyText = localStorage.getItem("aegisCode")
     ? "אין כרגע אירועים פעילים. המערכת ממשיכה לנטר."
     : "כדי לראות דיווחים צריך להצטרף עם קוד, בקופסה \"קבלת התראות לטלפון\" בעמוד הבית.";
-  document.getElementById("alertsList").innerHTML = html || `<div class="empty">${emptyText}</div>`;
+  setHTML("alertsList", html || `<div class="empty">${emptyText}</div>`);
 
-  // מעדכנים את המספרים בקופסאות ובתפריט
-  document.getElementById("countNew").textContent = counts.new;
-  document.getElementById("countChecking").textContent = counts.checking;
-  document.getElementById("countConfirmed").textContent = counts.confirmed;
-  document.getElementById("navCount").textContent = alerts.length;
+  // מעדכנים את המספרים בקופסאות (בעמוד ההתראות) ובתפריט (בכל העמודים)
+  setText("countNew", counts.new);
+  setText("countChecking", counts.checking);
+  setText("countConfirmed", counts.confirmed);
+  setText("navCount", alerts.length);
 
   // מעדכנים גם את המפה
   drawMap();
@@ -515,6 +520,9 @@ function update() {
 
 // בונים את כרטיסי האירועים בעמוד ההיסטוריה
 function renderHistory() {
+  // ההיסטוריה מוצגת רק בעמוד ההיסטוריה
+  if (PAGE !== "history") return;
+
   // מה שהמשתמש הקליד בתיבת החיפוש
   const search = document.getElementById("search").value.trim();
   let html = "";
@@ -557,7 +565,7 @@ function renderHistory() {
 }
 
 // בכל פעם שמקלידים בתיבת החיפוש, הרשימה מתעדכנת
-document.getElementById("search").oninput = renderHistory;
+if (PAGE === "history") document.getElementById("search").oninput = renderHistory;
 
 
 // ===================================================
@@ -567,11 +575,11 @@ document.getElementById("search").oninput = renderHistory;
 
 // שעון חי בעמוד ההתראות
 function showClock() {
-  document.getElementById("clock").textContent = new Date().toLocaleTimeString("he-IL");
+  setText("clock", new Date().toLocaleTimeString("he-IL"));
 }
 
-// טוענים את הדיווחים מהשרת, ואם נכנסו מהקישור שבהתראה מציגים את האירוע
-loadReports().then(openAlertFromLink);
+// טוענים את הדיווחים מהשרת. בעמוד ההתראות: אם הגיעו עם מספר אירוע, מציגים אותו על המפה
+loadReports().then(() => { if (PAGE === "alerts") openAlertFromLink(); });
 
 // מכינים את ההתראות, ואם הטלפון כבר רשום מעדכנים בשרת את המיקום
 prepareNotifications().then(refreshMyLocation);

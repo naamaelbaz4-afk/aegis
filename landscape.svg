@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMax slice">
+  <!-- נוף לילי: זריחה זהובה מאחורי רכסי הרים ירוקים -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1a14" stop-opacity="0"/>
+      <stop offset="1" stop-color="#121c15"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.28" cy="0.62" r="0.45">
+      <stop offset="0" stop-color="#f2b632" stop-opacity="0.55"/>
+      <stop offset="0.35" stop-color="#f2b632" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#f2b632" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="420" fill="url(#sky)"/>
+  <rect width="1200" height="420" fill="url(#sun)"/>
+  <path d="M0 250 L120 200 L230 235 L360 160 L470 215 L590 175 L720 230 L850 170 L980 220 L1090 185 L1200 215 L1200 420 L0 420 Z" fill="#1a3324"/>
+  <path d="M0 300 C150 250 260 290 400 265 C540 240 640 300 790 275 C930 252 1050 290 1200 262 L1200 420 L0 420 Z" fill="#13261b"/>
+  <path d="M0 350 C180 315 330 360 500 335 C680 310 800 365 980 338 C1080 324 1150 340 1200 332 L1200 420 L0 420 Z" fill="#0e1b13"/>
+  <path d="M0 395 C200 375 420 405 640 388 C860 372 1020 400 1200 385 L1200 420 L0 420 Z" fill="#080b09"/>
+</svg>

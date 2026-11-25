@@ -7,360 +7,176 @@
   <!-- מתאים את הדף לגודל המסך, גם בטלפון -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- השם שמופיע בלשונית של הדפדפן -->
-  <title>AEGIS | עמוד מצוקה עירוני חכם</title>
+  <title>PLUMERA | בית</title>
 
   <!-- גופן עברי מ-Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- ספריית המפות Leaflet (חינמית, בלי מפתח) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-  <!-- קישור לקובץ העיצוב -->
+  <!-- קישור לקובץ העיצוב (משותף לכל ארבעת העמודים) -->
   <link rel="stylesheet" href="FinalProject1.css">
 
   <!-- הגדרות שהופכות את האתר לאפליקציה שאפשר להוסיף למסך הבית -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0a0f1e">
+  <meta name="theme-color" content="#080b09">
+  <link rel="icon" href="flower.svg">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="AEGIS">
+  <meta name="apple-mobile-web-app-title" content="PLUMERA">
 </head>
-<body>
+<!-- data-page אומר לקובץ ה-JS באיזה עמוד אנחנו -->
+<body data-page="home">
 
-  <!-- ========== סרגל עליון וניווט ========== -->
+  <!-- ========== סרגל עליון וניווט (זהה בכל העמודים) ========== -->
   <header class="topbar">
     <!-- הלוגו: לחיצה עליו מחזירה לעמוד הבית -->
-    <div class="logo" data-page="home">
-      <div class="logo-icon">A</div>
+    <a class="logo" href="index.html">
+      <img class="logo-icon" src="flower.svg" alt="">
       <div>
-        <strong>AEGIS</strong>
-        <small>עמוד מצוקה עירוני חכם</small>
+        <strong>PLUMERA</strong>
+        <small>מערכת הגנה והתראה חכמה</small>
       </div>
-    </div>
+    </a>
 
-    <!-- התפריט: כל כפתור עובר לעמוד שכתוב ב-data-page שלו -->
+    <!-- התפריט: כל קישור פותח עמוד אחר. העמוד הנוכחי מסומן ב-active -->
     <nav class="nav">
-      <button class="nav-btn active" data-page="home">בית</button>
-      <button class="nav-btn" data-page="alerts">
-        התראות בזמן אמת <span class="badge" id="navCount">0</span> <!-- מספר ההתראות הפעילות -->
-      </button>
-      <button class="nav-btn" data-page="about">אודות</button>
-      <button class="nav-btn" data-page="history">היסטוריה</button>
+      <a class="nav-btn active" href="index.html">בית</a>
+      <a class="nav-btn" href="alerts.html">התראות בזמן אמת <span class="badge" id="navCount">0</span> <!-- מספר ההתראות הפעילות --></a>
+      <a class="nav-btn" href="about.html">אודות</a>
+      <a class="nav-btn" href="history.html">היסטוריה</a>
     </nav>
   </header>
 
-  <main>
+  <main class="page">
 
-    <!-- ========== עמוד 1: בית ========== -->
-    <section id="home" class="page active">
-
-      <div class="hero">
-        <div class="hero-text">
-          <!-- תגית קטנה מעל הכותרת -->
-          <span class="tag">פרויקט גמר · הנדסאי תקשוב וסייבר · התמחות IoT</span>
-          <!-- הכותרת הראשית. החלק השני צבוע במעבר צבע -->
-          <h1>כשכל שנייה חשובה,<br><span class="gradient">תדעו לפני כולם.</span></h1>
-          <p>
-            המערכת מתריעה בזמן אמת על פיגועים במרחב הציבורי.
-            היא משלבת עמודי מצוקה ברחוב, מצלמות חכמות ודיווחי אזרחים,
-            ומראה לכם בדיוק איפה הסכנה ומה המרחק שלה מכם.
-          </p>
-          <!-- שני כפתורים שעוברים לעמודים אחרים -->
-          <div class="hero-buttons">
-            <button class="btn btn-primary" data-page="alerts">לצפייה בהתראות החיות</button>
-            <button class="btn btn-ghost" data-page="about">איך זה עובד?</button>
-          </div>
-        </div>
-
-        <!-- איור של עמוד המצוקה, בנוי כולו ב-CSS -->
-        <div class="device">
-          <!-- שתי טבעות שמתרחבות סביב העמוד -->
-          <div class="ring"></div>
-          <div class="ring ring2"></div>
-          <div class="pole">
-            <!-- העדשה של המצלמה -->
-            <div class="cam"></div>
-            <!-- המסך הקטן של העמוד -->
-            <div class="screen">
-              <b>AEGIS</b>
-              <span>המערכת תקינה</span>
-            </div>
-            <!-- הנורית שמהבהבת -->
-            <div class="led"></div>
-            <!-- כפתור SOS: רק חלק מהאיור, לחיצה עליו לא עושה כלום -->
-            <div class="sos" style="cursor: default;">SOS</div>
-          </div>
-          <!-- הרגל של העמוד -->
-          <div class="pole-stand"></div>
-        </div>
-      </div>
-
-      <!-- פס עם ארבעה מספרים על הפרויקט -->
-      <div class="stats">
-        <div class="stat"><b>3</b><span>מקורות מידע שמאמתים כל אירוע</span></div>
-        <div class="stat"><b>כולם</b><span>מקבלים כל התראה בזמן אמת</span></div>
-        <div class="stat"><b>6</b><span>רכיבים בכל עמוד מצוקה</span></div>
-        <div class="stat"><b>0</b><span>זיהוי פנים, פרטיות מלאה</span></div>
-      </div>
-
-      <!-- דיווח על פיגוע: מתחיל את כל התהליך של המערכת -->
-      <div class="report">
-        <div>
-          <h2>ראיתם אירוע? דווחו עכשיו</h2>
-          <p>לחיצה אחת וזהו: המערכת מזהה את המיקום שלכם ומתריעה מיד בלוח ההתראות.</p>
-        </div>
-        <div class="report-form">
-                   <!-- כפתור גדול אחד: מזהה את המיקום ושולח את הדיווח (הפונקציה sendReport ב-FinalProject1.js) -->
-          <button id="reportBtn" class="btn btn-primary" style="width: 100%; font-size: 22px; padding: 22px;" onclick="sendReport()">דיווח על פיגוע</button>
-        </div>
-      </div>
-
-      <!-- הצטרפות להתראות: רק מי שיש לו את הקוד הסודי יכול להצטרף -->
-      <div class="report" style="margin-top: 20px;">
-        <div>
-          <h2>קבלת התראות לטלפון</h2>
-          <p id="joinStatus">מכניסים את קוד ההצטרפות ומאשרים התראות ומיקום. כל דיווח של חברי המערכת מגיע כהתראה לכל הטלפונים הרשומים, ובהתראה כתוב כמה האירוע רחוק.</p>
-        </div>
-        <div class="report-form">
-          <input id="joinCode" class="field" type="password" placeholder="קוד הצטרפות">
-          <button id="joinBtn" class="btn btn-ghost" onclick="joinAlerts()">הפעלת התראות</button>
-        </div>
-      </div>
-
-      <!-- שלושה כרטיסים: הבעיות שהפרויקט פותר -->
-      <h2 class="section-title">למה צריך את זה?</h2>
-      <div class="grid">
-        <div class="card">
-          <div class="icon red">!</div>
-          <h3>פערי מידע</h3>
-          <p>עובר זמן יקר עד שמתפרסם דיווח רשמי, והרשתות החברתיות לא תמיד מדויקות.</p>
-        </div>
-        <div class="card">
-          <div class="icon amber">?</div>
-          <h3>התראות שווא</h3>
-          <p>דיווח בודד שלא נבדק יוצר פאניקה מיותרת ופוגע באמון הציבור.</p>
-        </div>
-        <div class="card">
-          <div class="icon blue">→</div>
-          <h3>הליכה לכיוון הסכנה</h3>
-          <p>בלי מידע בזמן, אנשים עלולים ללכת בדיוק לכיוון האירוע.</p>
-        </div>
-      </div>
-
-      <!-- ארבעה כרטיסים: היתרונות של המערכת -->
-      <h2 class="section-title">מה המערכת נותנת לכם</h2>
-      <div class="grid grid-4">
-        <div class="card">
-          <div class="icon green">✓</div>
-          <h3>התראות מאומתות</h3>
-          <p>התראה נשלחת לציבור רק אחרי שכמה מקורות אישרו את האירוע.</p>
-        </div>
-        <div class="card">
-          <div class="icon blue">◎</div>
-          <h3>מיקום מדויק</h3>
-          <p>רואים על המפה איפה האירוע ומה המרחק שלו מכם.</p>
-        </div>
-        <div class="card">
-          <div class="icon red">●</div>
-          <h3>עמוד מצוקה בכל רחוב</h3>
-          <p>לחיצה אחת על הלחצן שולחת דיווח עם המיקום המדויק של העמוד.</p>
-        </div>
-        <div class="card">
-          <div class="icon amber">◐</div>
-          <h3>שומרים על פרטיות</h3>
-          <p>המצלמות מזהות התנהגות חריגה, אבל לא מזהות פנים.</p>
-        </div>
-      </div>
-
-      <!-- ארבעת השלבים של המערכת, מהדיווח ועד ההחלטה -->
-      <h2 class="section-title">ארבעה צעדים, שניות ספורות</h2>
-      <div class="steps">
-        <div class="step"><span>1</span><h3>דיווח</h3><p>עד ראייה לוחץ על לחצן המצוקה בעמוד הקרוב.</p></div>
-        <div class="step"><span>2</span><h3>אימות</h3><p>המערכת בודקת מצלמות ודיווחים נוספים מאותו אזור.</p></div>
-        <div class="step"><span>3</span><h3>התראה</h3><p>כל המשתמשים מקבלים התראה לטלפון.</p></div>
-        <div class="step"><span>4</span><h3>החלטה</h3><p>כל אחד מחליט: להתרחק, לתפוס מחסה או לעזור.</p></div>
-      </div>
-
-      <!-- באנר צבעוני בסוף העמוד, עם כפתור למסך ההתראות -->
-      <div class="cta">
-        <h2>ביטחון עירוני מתחיל בלחיצה אחת.</h2>
-        <p>צפו במערכת בפעולה: התראות נכנסות, מאומתות ומטופלות בזמן אמת.</p>
-        <button class="btn btn-light" data-page="alerts">למסך ההתראות</button>
-      </div>
-    </section>
-
-
-    <!-- ========== עמוד 2: התראות בזמן אמת ========== -->
-    <section id="alerts" class="page">
-      <div class="page-head">
-        <div>
-          <h1>התראות בזמן אמת</h1>
-          <p>כל האירועים הפעילים כרגע. אירוע שמסתיים עובר אוטומטית להיסטוריה.</p>
-        </div>
-        <!-- שידור חי ושעון. השעה מתעדכנת מ-script.js -->
-        <div class="live-box">
-          <span class="live-dot"></span> שידור חי
-          <b id="clock">00:00:00</b>
-        </div>
-      </div>
-
-      <!-- הערה שמסבירה מה מופיע בעמוד -->
-      <div class="demo-note">כאן מופיעים רק דיווחים אמיתיים של חברי המערכת. אירוע עובר להיסטוריה 3 דקות אחרי הדיווח.</div>
-
-      <!-- ספירה של ההתראות לפי מצב. המספרים מתעדכנים מ-script.js -->
-      <div class="summary">
-        <div class="sum new"><b id="countNew">0</b><span>התראות חדשות</span></div>
-        <div class="sum checking"><b id="countChecking">0</b><span>באימות</span></div>
-        <div class="sum confirmed"><b id="countConfirmed">0</b><span>מאומתות, כוחות בדרך</span></div>
-      </div>
-
-      <!-- רשימת ההתראות ולידה המפה -->
-      <div class="alerts-layout">
-        <!-- רשימת ההתראות: script.js בונה כאן את הכרטיסים -->
-        <div id="alertsList" class="alerts-list"></div>
-        <div class="map-box">
-          <!-- כאן נבנית המפה. dir="ltr" כי ספריית המפות עובדת משמאל לימין -->
-          <div id="map" dir="ltr"></div>
-          <p class="map-hint">לחצו על התראה כדי לראות על המפה איפה היא ואיפה אתם</p>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ========== עמוד 3: אודות ========== -->
-    <section id="about" class="page">
-      <div class="page-head">
-        <div>
-          <h1>אודות הפרויקט</h1>
-          <p>מה זה, איך זה עובד, ואיך זה עוזר לאזרחי המדינה.</p>
-        </div>
-      </div>
-
-      <!-- הסבר כללי על הפרויקט -->
-      <div class="about-intro card">
-        <h2>מה זה AEGIS?</h2>
+    <!-- ========== עמוד הבית ========== -->
+    <div class="hero">
+      <div class="hero-text">
+        <!-- תגית קטנה מעל הכותרת -->
+        <span class="tag">פרויקט גמר · הנדסאי תקשוב וסייבר · התמחות IoT</span>
+        <!-- הכותרת הראשית. החלק השני צבוע במעבר צבע -->
+        <h1>כשכל שנייה חשובה,<br><span class="gradient">תדעו לפני כולם.</span></h1>
         <p>
-          השם לקוח מהמיתולוגיה היוונית: המגן של זאוס ואתנה.
-          המערכת מתריעה בזמן אמת על פיגועים במרחב הציבורי, כמו דקירה, ירי ודריסה.
-          היא אוספת מידע משלושה מקורות, מאמתת אותו, ורק אז שולחת התראה לכל המשתמשים.
-          הלב של הפרויקט הוא עמוד מצוקה חכם שמותקן על עמודי חשמל ותאורה ברחוב.
+          המערכת מתריעה בזמן אמת על פיגועים במרחב הציבורי.
+          היא משלבת עמודי מצוקה ברחוב, מצלמות חכמות ודיווחי אזרחים,
+          ומראה לכם בדיוק איפה הסכנה ומה המרחק שלה מכם.
         </p>
-      </div>
-
-      <!-- שלושה כרטיסים: למי המערכת עוזרת -->
-      <h2 class="section-title">איך המערכת עוזרת לאזרחים</h2>
-      <div class="grid">
-        <div class="card">
-          <div class="icon blue">1</div>
-          <h3>כלל הציבור</h3>
-          <p>כל המשתמשים מקבלים התראה מיד, ויודעים לאן לא ללכת.</p>
-        </div>
-        <div class="card">
-          <div class="icon red">2</div>
-          <h3>מגיבים ראשונים</h3>
-          <p>אזרחים חמושים וכוחות הצלה יודעים בדיוק לאן להגיע, בלי לחפש.</p>
-        </div>
-        <div class="card">
-          <div class="icon green">3</div>
-          <h3>עדי ראייה</h3>
-          <p>כל מי שנמצא ברחוב יכול לדווח בלחיצה אחת, גם בלי טלפון ביד.</p>
+        <!-- שני כפתורים שפותחים עמודים אחרים -->
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="alerts.html">לצפייה בהתראות החיות</a>
+          <a class="btn btn-ghost" href="about.html">איך זה עובד?</a>
         </div>
       </div>
 
-      <!-- שרטוט: שלושת המקורות, האימות וההתראה לציבור -->
-      <h2 class="section-title">שלושה מקורות מידע, החלטה אחת</h2>
-      <div class="flow">
-        <div class="flow-sources">
-          <div class="flow-box">מצלמות חכמות<small>מזהות התנהגות חריגה, למשל אנשים שבורחים</small></div>
-          <div class="flow-box">דיווחי אזרחים<small>מהאפליקציה, עם מיקום ושעה</small></div>
-          <div class="flow-box">עמודי מצוקה<small>לחיצה על הלחצן שולחת את מיקום העמוד</small></div>
-        </div>
-        <div class="flow-arrow">←</div>
-        <div class="flow-box main">אימות<small>האם כמה מקורות מאשרים?</small></div>
-        <div class="flow-arrow">←</div>
-        <div class="flow-box final">התראה לציבור<small>לכל המשתמשים</small></div>
+      <!-- איור: פרח הפלומריה, הסמל של המערכת, עם טבעות שמתרחבות סביבו -->
+      <div class="device">
+        <div class="ring"></div>
+        <div class="ring ring2"></div>
+        <img class="hero-flower" src="flower.svg" alt="פרח פלומריה">
       </div>
+    </div>
 
-      <!-- כרטיס לכל אחד מששת הרכיבים -->
-      <h2 class="section-title">ממה בנוי עמוד המצוקה</h2>
-      <div class="grid">
-        <div class="card part"><h3>בקר ראשי</h3><p>המוח של העמוד. קורא את הלחצן, מפעיל את שאר הרכיבים ושולח התראה לשרת דרך הרשת האלחוטית.</p></div>
-        <div class="card part"><h3>לחצן מצוקה</h3><p>לחצן פשוט ואמין עם שני מצבים בלבד. לחיצה עליו מתחילה את כל התהליך.</p></div>
-        <div class="card part"><h3>מסך קטן</h3><p>מציג את מצב העמוד, למשל שהמערכת תקינה או שהתראה נשלחה.</p></div>
-        <div class="card part"><h3>זמזם</h3><p>משמיע צפירה שעולה ויורדת, כדי שכל הסביבה תשמע שקורה משהו.</p></div>
-        <div class="card part"><h3>מצלמה</h3><p>יחידה עצמאית שמצלמת את האזור, כדי שהמוקד יראה אם האירוע אמיתי.</p></div>
-        <div class="card part"><h3>נורית חיווי</h3><p>כבויה במצב רגיל, מהבהבת כשנשלחה התראה, ודולקת קבוע כשכוחות בדרך.</p></div>
+    <!-- פס עם ארבעה מספרים על הפרויקט -->
+    <div class="stats">
+      <div class="stat"><b>3</b><span>מקורות מידע שמאמתים כל אירוע</span></div>
+      <div class="stat"><b>כולם</b><span>מקבלים כל התראה בזמן אמת</span></div>
+      <div class="stat"><b>6</b><span>רכיבים בכל עמוד מצוקה</span></div>
+      <div class="stat"><b>0</b><span>זיהוי פנים, פרטיות מלאה</span></div>
+    </div>
+
+    <!-- דיווח על פיגוע: מתחיל את כל התהליך של המערכת -->
+    <div class="report">
+      <div>
+        <h2>ראיתם אירוע? דווחו עכשיו</h2>
+        <p>לחיצה אחת וזהו: המערכת מזהה את המיקום שלכם ומתריעה מיד בלוח ההתראות.</p>
       </div>
-
-      <!-- השיפורים העתידיים: ארבעה כרטיסים, באותו עיצוב כמו שאר הכרטיסים באתר -->
-      <h2 class="section-title">השלב הבא של AEGIS</h2>
-      <div class="grid grid-4">
-        <div class="card">
-          <div class="icon blue">◎</div>
-          <h3>מקלט מיקום</h3>
-          <p>כל עמוד ישלח בעצמו את המיקום המדויק שלו, בלי להגדיר אותו מראש.</p>
-        </div>
-        <div class="card">
-          <div class="icon amber">ϟ</div>
-          <h3>סוללה נטענת</h3>
-          <p>העמוד ימשיך לעבוד גם בהפסקת חשמל, בדיוק כשהכי צריך אותו.</p>
-        </div>
-        <div class="card">
-          <div class="icon green">▣</div>
-          <h3>קופסה מודפסת</h3>
-          <p>מארז מודפס בתלת מימד, שמגן על הרכיבים מגשם, מאבק וממכות.</p>
-        </div>
-        <div class="card">
-          <div class="icon red">◈</div>
-          <h3>שרת מרכזי</h3>
-          <p>מקום אחד שמאחד את המצלמות, האפליקציה והעמודים, ומאמת אירועים לבד.</p>
-        </div>
+      <div class="report-form">
+        <!-- כפתור גדול אחד: מזהה את המיקום ושולח את הדיווח (הפונקציה sendReport ב-FinalProject1.js) -->
+        <button id="reportBtn" class="btn btn-primary" style="width: 100%; font-size: 22px; padding: 22px;" onclick="sendReport()">דיווח על פיגוע</button>
       </div>
+    </div>
 
-      <!-- פרטי ההגשה -->
-      <div class="credits card">
-        <div><small>מגישה</small><b>נעמה אלבז</b></div>
-        <div><small>מנחה הפרויקט</small><b>שאלתיאל יעיש</b></div>
-        <div><small>רכז המגמה</small><b>מאור צבעוני</b></div>
-        <div><small>מסלול</small><b>הנדסאי תקשוב וסייבר, התמחות IoT</b></div>
-        <div><small>שנת לימודים</small><b>תשפ״ז</b></div>
+    <!-- הצטרפות להתראות: רק מי שיש לו את הקוד הסודי יכול להצטרף -->
+    <div class="report" style="margin-top: 20px;">
+      <div>
+        <h2>קבלת התראות לטלפון</h2>
+        <p id="joinStatus">מכניסים את קוד ההצטרפות ומאשרים התראות ומיקום. כל דיווח של חברי המערכת מגיע כהתראה לכל הטלפונים הרשומים, ובהתראה כתוב כמה האירוע רחוק.</p>
       </div>
-    </section>
-
-
-    <!-- ========== עמוד 4: היסטוריה ========== -->
-    <section id="history" class="page">
-      <div class="page-head">
-        <div>
-          <h1>היסטוריית אירועים</h1>
-          <p>כל האירועים שהסתיימו ב-48 השעות האחרונות.</p>
-        </div>
-        <!-- תיבת חיפוש: הרשימה מסתננת בזמן ההקלדה -->
-        <input id="search" class="field search" type="text" placeholder="חיפוש לפי עיר, סוג אירוע...">
+      <div class="report-form">
+        <input id="joinCode" class="field" type="password" placeholder="קוד הצטרפות">
+        <button id="joinBtn" class="btn btn-ghost" onclick="joinAlerts()">הפעלת התראות</button>
       </div>
+    </div>
 
-      <!-- הערה שמסבירה כמה זמן אירועים נשמרים -->
-      <div class="demo-note">אירועים נשמרים כאן 48 שעות מרגע הדיווח, ואז נמחקים.</div>
-
-      <!-- סיכום: כמה אירועים וכמה דקות טיפול בממוצע. מחושב ב-script.js -->
-      <div class="summary">
-        <div class="sum"><b id="historyTotal">0</b><span>אירועים שהסתיימו</span></div>
-        <div class="sum"><b id="historyAvg">0</b><span>דקות טיפול בממוצע</span></div>
+    <!-- שלושה כרטיסים: הבעיות שהפרויקט פותר -->
+    <h2 class="section-title">למה צריך את זה?</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="icon red">!</div>
+        <h3>פערי מידע</h3>
+        <p>עובר זמן יקר עד שמתפרסם דיווח רשמי, והרשתות החברתיות לא תמיד מדויקות.</p>
       </div>
+      <div class="card">
+        <div class="icon amber">?</div>
+        <h3>התראות שווא</h3>
+        <p>דיווח בודד שלא נבדק יוצר פאניקה מיותרת ופוגע באמון הציבור.</p>
+      </div>
+      <div class="card">
+        <div class="icon blue">→</div>
+        <h3>הליכה לכיוון הסכנה</h3>
+        <p>בלי מידע בזמן, אנשים עלולים ללכת בדיוק לכיוון האירוע.</p>
+      </div>
+    </div>
 
-      <!-- רשימת האירועים: script.js בונה כאן את הכרטיסים -->
-      <div id="historyList" class="history-list"></div>
-    </section>
+    <!-- ארבעה כרטיסים: היתרונות של המערכת -->
+    <h2 class="section-title">מה המערכת נותנת לכם</h2>
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="icon green">✓</div>
+        <h3>התראות מאומתות</h3>
+        <p>התראה נשלחת לציבור רק אחרי שכמה מקורות אישרו את האירוע.</p>
+      </div>
+      <div class="card">
+        <div class="icon blue">◎</div>
+        <h3>מיקום מדויק</h3>
+        <p>רואים על המפה איפה האירוע ומה המרחק שלו מכם.</p>
+      </div>
+      <div class="card">
+        <div class="icon red">●</div>
+        <h3>עמוד מצוקה בכל רחוב</h3>
+        <p>לחיצה אחת על הלחצן שולחת דיווח עם המיקום המדויק של העמוד.</p>
+      </div>
+      <div class="card">
+        <div class="icon amber">◐</div>
+        <h3>שומרים על פרטיות</h3>
+        <p>המצלמות מזהות התנהגות חריגה, אבל לא מזהות פנים.</p>
+      </div>
+    </div>
 
+    <!-- ארבעת השלבים של המערכת, מהדיווח ועד ההחלטה -->
+    <h2 class="section-title">ארבעה צעדים, שניות ספורות</h2>
+    <div class="steps">
+      <div class="step"><span>1</span><h3>דיווח</h3><p>עד ראייה לוחץ על לחצן המצוקה בעמוד הקרוב.</p></div>
+      <div class="step"><span>2</span><h3>אימות</h3><p>המערכת בודקת מצלמות ודיווחים נוספים מאותו אזור.</p></div>
+      <div class="step"><span>3</span><h3>התראה</h3><p>כל המשתמשים מקבלים התראה לטלפון.</p></div>
+      <div class="step"><span>4</span><h3>החלטה</h3><p>כל אחד מחליט: להתרחק, לתפוס מחסה או לעזור.</p></div>
+    </div>
+
+    <!-- באנר בסוף העמוד, עם הסיסמה של המערכת וקישור לעמוד ההתראות -->
+    <div class="cta">
+      <h2>רשת אחת. מטרה אחת. הצלת חיים.</h2>
+      <p class="motto" dir="ltr">One Network. One Mission. Saving Lives.</p>
+      <p>צפו במערכת בפעולה: התראות נכנסות, מאומתות ומטופלות בזמן אמת.</p>
+      <a class="btn btn-light" href="alerts.html">למסך ההתראות</a>
+    </div>
   </main>
 
-  <!-- תחתית האתר -->
+  <!-- תחתית האתר (זהה בכל העמודים) -->
   <footer class="footer">
-    AEGIS · פרויקט גמר של נעמה אלבז · תשפ״ז
+    <b>PLUMERA</b> · <span dir="ltr">One Network. One Mission. Saving Lives.</span><br>
+    רשת אחת. מטרה אחת. הצלת חיים. · פרויקט גמר של נעמה אלבז · תשפ״ז
   </footer>
 
-  <!-- ספריית המפות, ואחריה קובץ ה-JavaScript שלנו. תמיד בסוף הדף -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- קובץ ה-JavaScript שלנו. תמיד בסוף הדף -->
   <script src="FinalProject1.js"></script>
 </body>
 </html>

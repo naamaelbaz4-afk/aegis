@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- הדף בעברית, והכיוון שלו מימין לשמאל -->
+<html lang="he" dir="rtl">
+<head>
+  <!-- מאפשר להציג עברית ותווים מיוחדים -->
+  <meta charset="UTF-8">
+  <!-- מתאים את הדף לגודל המסך, גם בטלפון -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- השם שמופיע בלשונית של הדפדפן -->
+  <title>PLUMERA | התראות בזמן אמת</title>
+
+  <!-- גופן עברי מ-Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- ספריית המפות Leaflet (חינמית, בלי מפתח). צריך אותה רק בעמוד הזה -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- קישור לקובץ העיצוב (משותף לכל ארבעת העמודים) -->
+  <link rel="stylesheet" href="FinalProject1.css">
+
+  <!-- הגדרות שהופכות את האתר לאפליקציה שאפשר להוסיף למסך הבית -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#080b09">
+  <link rel="icon" href="flower.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLUMERA">
+</head>
+<!-- data-page אומר לקובץ ה-JS באיזה עמוד אנחנו -->
+<body data-page="alerts">
+
+  <!-- ========== סרגל עליון וניווט (זהה בכל העמודים) ========== -->
+  <header class="topbar">
+    <!-- הלוגו: לחיצה עליו מחזירה לעמוד הבית -->
+    <a class="logo" href="index.html">
+      <img class="logo-icon" src="flower.svg" alt="">
+      <div>
+        <strong>PLUMERA</strong>
+        <small>מערכת הגנה והתראה חכמה</small>
+      </div>
+    </a>
+
+    <!-- התפריט: כל קישור פותח עמוד אחר. העמוד הנוכחי מסומן ב-active -->
+    <nav class="nav">
+      <a class="nav-btn" href="index.html">בית</a>
+      <a class="nav-btn active" href="alerts.html">התראות בזמן אמת <span class="badge" id="navCount">0</span> <!-- מספר ההתראות הפעילות --></a>
+      <a class="nav-btn" href="about.html">אודות</a>
+      <a class="nav-btn" href="history.html">היסטוריה</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <!-- ========== עמוד התראות בזמן אמת ========== -->
+    <div class="page-head">
+      <div>
+        <h1>התראות בזמן אמת</h1>
+        <p>כל האירועים הפעילים כרגע. אירוע שמסתיים עובר אוטומטית להיסטוריה.</p>
+      </div>
+      <!-- שידור חי ושעון. השעה מתעדכנת מ-FinalProject1.js -->
+      <div class="live-box">
+        <span class="live-dot"></span> שידור חי
+        <b id="clock">00:00:00</b>
+      </div>
+    </div>
+
+    <!-- הערה שמסבירה מה מופיע בעמוד -->
+    <div class="demo-note">כאן מופיעים רק דיווחים אמיתיים של חברי המערכת. אירוע עובר להיסטוריה 3 דקות אחרי הדיווח.</div>
+
+    <!-- ספירה של ההתראות לפי מצב. המספרים מתעדכנים מ-FinalProject1.js -->
+    <div class="summary">
+      <div class="sum new"><b id="countNew">0</b><span>התראות חדשות</span></div>
+      <div class="sum checking"><b id="countChecking">0</b><span>באימות</span></div>
+      <div class="sum confirmed"><b id="countConfirmed">0</b><span>מאומתות, כוחות בדרך</span></div>
+    </div>
+
+    <!-- רשימת ההתראות ולידה המפה -->
+    <div class="alerts-layout">
+      <!-- רשימת ההתראות: FinalProject1.js בונה כאן את הכרטיסים -->
+      <div id="alertsList" class="alerts-list"></div>
+      <div class="map-box">
+        <!-- כאן נבנית המפה. dir="ltr" כי ספריית המפות עובדת משמאל לימין -->
+        <div id="map" dir="ltr"></div>
+        <p class="map-hint">לחצו על התראה כדי לראות על המפה איפה היא ואיפה אתם</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- תחתית האתר (זהה בכל העמודים) -->
+  <footer class="footer">
+    <b>PLUMERA</b> · <span dir="ltr">One Network. One Mission. Saving Lives.</span><br>
+    רשת אחת. מטרה אחת. הצלת חיים. · פרויקט גמר של נעמה אלבז · תשפ״ז
+  </footer>
+
+  <!-- קובץ ה-JavaScript שלנו. תמיד בסוף הדף -->
+  <!-- ספריית המפות, רק בעמוד ההתראות -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="FinalProject1.js"></script>
+</body>
+</html>
