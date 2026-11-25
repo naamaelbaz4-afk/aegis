@@ -156,7 +156,7 @@ function savePosition(position) {
 
 // כפתור הדיווח בעמוד הבית: מזהה לבד את המיקום של המדווח
 function sendReport() {
-   // אין בחירה של סוג אירוע: כל דיווח נשלח בשם אחד
+  // אין בחירה של סוג אירוע: כל דיווח נשלח בשם אחד
   const type = "דיווח על פיגוע";
 
   // משנים את הטקסט של הכפתור, כדי שהמשתמש יידע שמשהו קורה
@@ -185,6 +185,8 @@ async function finishReport(type, lat, lon) {
     document.getElementById("reportBtn").textContent = "מאתר את הכתובת...";
     // מחכים לכתובת (רחוב ועיר)
     place = await getAddress(lat, lon);
+    // אם הכתובת לא הגיעה בפעם הראשונה, מנסים פעם נוספת
+    if (place.startsWith("<span")) place = await getAddress(lat, lon);
   }
 
   // שולחים את הדיווח לשרת. השרת שומר אותו ושולח התראה לכל המשתמשים
@@ -205,8 +207,8 @@ async function getAddress(lat, lon) {
     // הכתובת של השירות, עם המיקום שלנו ובקשה לתשובה בעברית
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=he`;
 
-    // שולחים את הבקשה, ומחכים עד 5 שניות לתשובה
-    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    // שולחים את הבקשה, ומחכים עד 10 שניות לתשובה
+    const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
 
     // הופכים את התשובה לאובייקט שאפשר לקרוא ממנו
     const data = await response.json();
@@ -421,8 +423,8 @@ function rebuild() {
   alerts = [];
   history = [];
   reports.forEach(r => {
-    // בדיווחים ישנים נשמר גם "(דיוק של כ־X מטר)" ליד הכתובת. מורידים אותו מהתצוגה
-    r = { ...r, place: String(r.place).replace(/\s*\(דיוק של[^)]*\)/, "") };
+    // כל דיווח מוצג בשם אחד, ומורידים מהכתובת את "(דיוק של כ־X מטר)" של דיווחים ישנים
+    r = { ...r, type: "דיווח על פיגוע", place: String(r.place).replace(/\s*\(דיוק של[^)]*\)/, "") };
     const age = (now - r.time) / 1000;   // כמה שניות עברו מאז הדיווח
     if (age < EVENT_LENGTH) alerts.push({ ...r, age, time: new Date(r.time) });
     else history.push(toHistory(r));
