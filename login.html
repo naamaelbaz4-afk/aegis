@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- הדף בעברית, והכיוון שלו מימין לשמאל -->
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLUMERA | כניסה</title>
+
+  <!-- גופן עברי מ-Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <!-- קובץ העיצוב המשותף -->
+  <link rel="stylesheet" href="FinalProject1.css">
+
+  <!-- הגדרות האפליקציה למסך הבית -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#080b09">
+  <link rel="icon" href="flower.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLUMERA">
+</head>
+<!-- data-page אומר לקובץ ה-JS שזה עמוד הכניסה -->
+<body data-page="login" class="login-page">
+
+  <main class="login-wrap page">
+    <div class="login-card">
+      <!-- הלוגו -->
+      <img class="login-flower" src="flower.svg" alt="">
+      <h1>PLUMERA</h1>
+      <p class="login-sub">מערכת הגנה והתראה חכמה</p>
+
+      <!-- שתי לשוניות: כניסה למשתמש קיים, והרשמה למשתמש חדש -->
+      <div class="login-tabs">
+        <button id="tabLogin" class="active" onclick="showTab('login')">כניסה</button>
+        <button id="tabRegister" onclick="showTab('register')">הרשמה</button>
+      </div>
+
+      <!-- טופס כניסה: שם משתמש וסיסמה -->
+      <form id="loginForm" onsubmit="doLogin(event)">
+        <input id="loginUser" class="field" type="text" placeholder="שם משתמש" autocomplete="username" required>
+        <input id="loginPass" class="field" type="password" placeholder="סיסמה" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">כניסה</button>
+      </form>
+
+      <!-- טופס הרשמה: רק מי שיש לו קוד הצטרפות יכול ליצור משתמש -->
+      <form id="registerForm" onsubmit="doRegister(event)" hidden>
+        <input id="regCode" class="field" type="password" placeholder="קוד הצטרפות (מקבלים ממנהלת המערכת)" required>
+        <input id="regUser" class="field" type="text" placeholder="שם משתמש (3 עד 20 תווים)" autocomplete="username" required>
+        <input id="regPass" class="field" type="password" placeholder="סיסמה (לפחות 6 תווים)" autocomplete="new-password" required>
+        <input id="regPass2" class="field" type="password" placeholder="הסיסמה שוב" autocomplete="new-password" required>
+        <button class="btn btn-primary" type="submit">יצירת משתמש</button>
+      </form>
+
+      <!-- הודעות: שגיאה או "מתחברים..." -->
+      <p id="loginStatus" class="login-status"></p>
+    </div>
+
+    <p class="login-motto" dir="ltr">One Network. One Mission. Saving Lives.</p>
+  </main>
+
+  <!-- קובץ ה-JavaScript שלנו -->
+  <script src="FinalProject1.js"></script>
+</body>
+</html>

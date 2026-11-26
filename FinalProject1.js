@@ -1,11 +1,31 @@
 // ===================================================
-//  חלק 1: העמודים
-//  לכל עמוד יש קובץ HTML משלו: index (בית), alerts (התראות),
-//  about (אודות) ו-history (היסטוריה). כולם משתמשים בקובץ JS הזה.
+//  חלק 1: העמודים והכניסה
+//  לכל עמוד יש קובץ HTML משלו: login (כניסה והרשמה), index (בית),
+//  alerts (התראות), about (אודות) ו-history (היסטוריה). כולם משתמשים בקובץ JS הזה.
 // ===================================================
 
 // באיזה עמוד אנחנו עכשיו: כתוב ב-data-page של ה-body בכל קובץ HTML
 const PAGE = document.body.dataset.page;
+
+// ---------- כניסה למערכת ----------
+// אחרי כניסה מוצלחת השרת נותן "token": מחרוזת סודית שמזהה את המשתמש.
+// שומרים אותה בדפדפן, ושולחים אותה לשרת בכל בקשה
+const TOKEN = localStorage.getItem("plumeraToken");
+const USERNAME = localStorage.getItem("plumeraUser");
+
+// מוחקים את הקוד הקבוע של הגרסה הקודמת, שכבר לא בשימוש
+localStorage.removeItem("aegisCode");
+
+// בלי כניסה אי אפשר לראות את האתר: עוברים לעמוד הכניסה.
+// ומי שכבר מחובר ונכנס לעמוד הכניסה, עובר לעמוד הבית
+if (PAGE !== "login" && !TOKEN) location.replace("login.html");
+if (PAGE === "login" && TOKEN) location.replace("index.html");
+
+// מוחקים את פרטי הכניסה מהדפדפן
+function clearLogin() {
+  localStorage.removeItem("plumeraToken");
+  localStorage.removeItem("plumeraUser");
+}
 
 // מעבר לעמוד אחר באתר, למשל goTo("alerts") פותח את alerts.html
 function goTo(page, search = "") {
@@ -245,40 +265,38 @@ async function getAddress(lat, lon) {
 
 // ---------- התראות לטלפון דרך השרת שלנו ----------
 
-// הקוד הסודי נשמר בדפדפן, כדי שלא צריך להקליד אותו כל פעם
-function getCode() {
-  let code = localStorage.getItem("aegisCode");
-  if (!code) {
-    code = prompt("כדי לדווח צריך את קוד ההצטרפות:");
-    if (code) localStorage.setItem("aegisCode", code.trim());
-  }
-  return code ? code.trim() : null;
-}
+// שולחים בקשה לשרת ומחזירים את התשובה.
+// אם המשתמש מחובר, מצרפים את ה-token בכותרת Authorization כדי שהשרת יידע מי הוא
+async function callServer(path, data = {}) {
+  const headers = { "Content-Type": "application/json" };
+  const token = localStorage.getItem("plumeraToken");
+  if (token) headers.Authorization = "Bearer " + token;
 
-// שולחים בקשה לשרת עם הקוד הסודי, ומחזירים את התשובה
-async function callServer(path, data) {
   const response = await fetch(SERVER_URL + path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(data)
   });
-  return response.json();
+  const result = await response.json();
+
+  // 401 אומר שהחיבור פג תוקף או נמחק: צריך להתחבר מחדש
+  if (response.status === 401 && path !== "/login") {
+    clearLogin();
+    location.replace("login.html");
+  }
+  return result;
 }
 
 // שולחים את הדיווח לשרת. השרת שומר אותו ושולח התראה לכל המשתמשים
 // מחזירים את הדיווח כפי שנשמר בשרת (עם מספר אירוע ושעה), או null אם נכשל
 async function notifyPhone(type, place, lat, lon, source) {
-  const code = getCode();
-  if (!code) return null;
-
   // מורידים תגיות HTML מהמקום (למשל <small> של רמת הדיוק), כי בשרת נשמר רק טקסט
   const cleanPlace = place.replace(/<[^>]*>/g, "").trim();
 
   try {
-    const result = await callServer("/report", { code, type, place: cleanPlace, lat, lon, source });
+    const result = await callServer("/report", { type, place: cleanPlace, lat, lon, source });
     if (!result.ok) {
       alert("השרת לא קיבל את הדיווח: " + result.error);
-      if (result.error === "קוד שגוי") localStorage.removeItem("aegisCode");
       return null;
     }
     console.log("ההתראה נשלחה ל-" + result.sent + " טלפונים");
@@ -295,14 +313,9 @@ async function notifyPhone(type, place, lat, lon, source) {
 
 // טוענים מהשרת את כל הדיווחים מ-48 השעות האחרונות
 async function loadReports() {
-  const code = localStorage.getItem("aegisCode");
-  if (!code) { rebuild(); return; }   // בלי קוד אין גישה לדיווחים
   try {
-    const result = await callServer("/reports", { code });
-    if (!result.ok) {
-      if (result.error === "קוד שגוי") localStorage.removeItem("aegisCode");
-      return;
-    }
+    const result = await callServer("/reports");
+    if (!result.ok) return;
     reports = result.reports;
     timeOffset = result.now - Date.now();   // כדי שכל המכשירים יחשבו זמן לפי השעון של השרת
     rebuild();
@@ -325,11 +338,9 @@ async function prepareNotifications() {
   }
 }
 
-// כפתור "הפעלת התראות": נרשמים לקבלת התראות מהשרת
+// כפתור "הפעלת התראות": הטלפון של המשתמש המחובר נרשם לקבלת התראות מהשרת
 async function joinAlerts() {
   const status = document.getElementById("joinStatus");
-  const code = document.getElementById("joinCode").value.trim() || localStorage.getItem("aegisCode");
-  if (!code) { status.textContent = "צריך להכניס את קוד ההצטרפות."; return; }
 
   // בודקים שהדפדפן תומך בהתראות. באייפון צריך קודם להוסיף את האתר למסך הבית
   if (!swRegistration || !serverKey) {
@@ -348,14 +359,12 @@ async function joinAlerts() {
       applicationServerKey: serverKey
     });
 
-    // 3. בודקים את הקוד ושולחים לשרת את פרטי ההרשמה ואת המיקום
-    status.textContent = "בודקים את הקוד...";
-    localStorage.setItem("aegisCode", code);
+    // 3. שולחים לשרת את פרטי ההרשמה ואת המיקום. השרת שומר אותם בטבלת subscriptions
+    status.textContent = "שומרים בשרת...";
     const result = await sendMyDetails(subscription);
     if (!result || !result.ok) {
-      localStorage.removeItem("aegisCode");
       await subscription.unsubscribe();
-      status.textContent = "הקוד לא נכון.";
+      status.textContent = "השרת לא שמר את ההרשמה. נסו שוב.";
       return;
     }
     status.textContent = "מעולה! ההתראות פעילות בטלפון הזה ✓";
@@ -367,10 +376,9 @@ async function joinAlerts() {
 
 // שולחים לשרת את פרטי ההרשמה ואת המיקום העדכני
 function sendMyDetails(subscription) {
-  const code = localStorage.getItem("aegisCode");
   return new Promise(resolve => {
     const send = (lat, lon) =>
-      callServer("/subscribe", { code, subscription: subscription.toJSON(), lat, lon }).then(resolve, () => resolve(null));
+      callServer("/subscribe", { subscription: subscription.toJSON(), lat, lon }).then(resolve, () => resolve(null));
     navigator.geolocation.getCurrentPosition(
       position => send(position.coords.latitude, position.coords.longitude),
       () => send(null, null),   // אם אין מיקום, נרשמים בלי מיקום ומקבלים את כל ההתראות
@@ -379,9 +387,9 @@ function sendMyDetails(subscription) {
   });
 }
 
-// בכל פעם שפותחים את האפליקציה: מעדכנים בשרת את המיקום, כדי שהסינון לפי מרחק יהיה מדויק
+// בכל פעם שפותחים את האפליקציה: מעדכנים בשרת את המיקום, כדי שהמרחק בהתראה יהיה מדויק
 async function refreshMyLocation() {
-  if (!("serviceWorker" in navigator) || !localStorage.getItem("aegisCode")) return;
+  if (!("serviceWorker" in navigator) || !TOKEN) return;
   const subscription = swRegistration && await swRegistration.pushManager.getSubscription();
   if (subscription) {
     sendMyDetails(subscription);
@@ -416,6 +424,76 @@ function openAlertFromLink() {
 
   // אחרת מסמנים אותו על המפה. כשהמיקום שלי יזוהה, המפה תראה את שנינו
   selectAlert(eventId);
+}
+
+// ---------- עמוד הכניסה: כניסה, הרשמה ויציאה ----------
+
+// מעבר בין הלשונית "כניסה" ללשונית "הרשמה"
+function showTab(tab) {
+  document.getElementById("loginForm").hidden = tab !== "login";
+  document.getElementById("registerForm").hidden = tab !== "register";
+  document.getElementById("tabLogin").classList.toggle("active", tab === "login");
+  document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+  setText("loginStatus", "");
+}
+
+// אחרי כניסה או הרשמה מוצלחת: שומרים את ה-token ואת שם המשתמש, ועוברים לעמוד הבית
+function finishLogin(result) {
+  localStorage.setItem("plumeraToken", result.token);
+  localStorage.setItem("plumeraUser", result.username);
+  location.replace("index.html");
+}
+
+// כניסה עם שם משתמש וסיסמה
+async function doLogin(event) {
+  event.preventDefault();   // הטופס לא טוען את הדף מחדש
+  setText("loginStatus", "מתחברים...");
+  try {
+    const result = await callServer("/login", {
+      username: document.getElementById("loginUser").value.trim(),
+      password: document.getElementById("loginPass").value
+    });
+    if (!result.ok) { setText("loginStatus", result.error); return; }
+    finishLogin(result);
+  } catch {
+    setText("loginStatus", "אין חיבור לשרת. נסו שוב.");
+  }
+}
+
+// הרשמה: קוד הצטרפות, שם משתמש וסיסמה פעמיים
+async function doRegister(event) {
+  event.preventDefault();
+  const password = document.getElementById("regPass").value;
+  if (password !== document.getElementById("regPass2").value) {
+    setText("loginStatus", "שתי הסיסמאות לא זהות.");
+    return;
+  }
+  setText("loginStatus", "יוצרים משתמש...");
+  try {
+    const result = await callServer("/register", {
+      joinCode: document.getElementById("regCode").value.trim(),
+      username: document.getElementById("regUser").value.trim(),
+      password
+    });
+    if (!result.ok) { setText("loginStatus", result.error); return; }
+    finishLogin(result);
+  } catch {
+    setText("loginStatus", "אין חיבור לשרת. נסו שוב.");
+  }
+}
+
+// יציאה: השרת מוחק את החיבור, והטלפון הזה מפסיק לקבל התראות
+async function logout() {
+  if (!confirm("לצאת מהמערכת? הטלפון הזה יפסיק לקבל התראות עד הכניסה הבאה.")) return;
+  try {
+    const subscription = swRegistration && await swRegistration.pushManager.getSubscription();
+    await callServer("/logout", { endpoint: subscription ? subscription.endpoint : null });
+    if (subscription) await subscription.unsubscribe();
+  } catch {
+    console.log("לא הצלחנו להודיע לשרת על היציאה");
+  }
+  clearLogin();
+  location.replace("login.html");
 }
 
 // ===================================================
@@ -465,6 +543,7 @@ function renderAlerts() {
           <div class="alert-info">
             <span>מיקום: <b>${safe(alert.place)}</b></span>
             <span>מקור: <b>${safe(alert.source)}</b></span>
+            ${alert.reporter ? `<span>דיווח של: <b>${safe(alert.reporter)}</b></span>` : ""}
             <span>מרחק ממך: <b>${distanceFromMe(alert)}</b></span>
             <span>התקבלה: <b>${alert.time.toLocaleTimeString("he-IL")}</b></span>
           </div>
@@ -474,9 +553,7 @@ function renderAlerts() {
   });
 
   // מכניסים את כל הכרטיסים לדף. אם אין התראות, מציגים הודעה
-  const emptyText = localStorage.getItem("aegisCode")
-    ? "אין כרגע אירועים פעילים. המערכת ממשיכה לנטר."
-    : "כדי לראות דיווחים צריך להצטרף עם קוד, בקופסה \"קבלת התראות לטלפון\" בעמוד הבית.";
+  const emptyText = "אין כרגע אירועים פעילים. המערכת ממשיכה לנטר.";
   setHTML("alertsList", html || `<div class="empty">${emptyText}</div>`);
 
   // מעדכנים את המספרים בקופסאות (בעמוד ההתראות) ובתפריט (בכל העמודים)
@@ -502,6 +579,7 @@ function toHistory(r) {
     end: end.toLocaleTimeString("he-IL").slice(0, 5),      // השעה שבה האירוע הסתיים
     minutes: Math.round(EVENT_LENGTH / 60),                // משך האירוע בדקות
     sources: r.source,
+    reporter: r.reporter || "—",                           // שם המשתמש שדיווח (בעמוד המצוקה אין משתמש)
     summary: "האירוע הסתיים. הוא יימחק מההיסטוריה 48 שעות אחרי הדיווח."
   };
 }
@@ -533,7 +611,7 @@ function renderHistory() {
     totalMinutes += event.minutes;
 
     // מציגים רק אירועים שמתאימים לחיפוש
-    if (!(event.type + event.place + event.date).includes(search)) return;
+    if (!(event.type + event.place + event.date + event.reporter).includes(search)) return;
 
     // כרטיס HTML לכל אירוע
     html += `
@@ -550,6 +628,7 @@ function renderHistory() {
           <span>סיום</span><b>${event.end}</b>
           <span>משך טיפול</span><b>${event.minutes} דקות</b>
           <span>מקור הדיווח</span><b>${safe(event.sources)}</b>
+          <span>דיווח של</span><b>${safe(event.reporter)}</b>
         </div>
         <p>${event.summary}</p>
       </div>`;
@@ -578,15 +657,21 @@ function showClock() {
   setText("clock", new Date().toLocaleTimeString("he-IL"));
 }
 
-// טוענים את הדיווחים מהשרת. בעמוד ההתראות: אם הגיעו עם מספר אירוע, מציגים אותו על המפה
-loadReports().then(() => { if (PAGE === "alerts") openAlertFromLink(); });
+// בעמוד הכניסה לא טוענים כלום, רק מחכים שהמשתמש יתחבר
+if (PAGE !== "login" && TOKEN) {
+  // שם המשתמש המחובר בסרגל העליון
+  setText("userName", USERNAME);
 
-// מכינים את ההתראות, ואם הטלפון כבר רשום מעדכנים בשרת את המיקום
-prepareNotifications().then(refreshMyLocation);
+  // טוענים את הדיווחים מהשרת. בעמוד ההתראות: אם הגיעו עם מספר אירוע, מציגים אותו על המפה
+  loadReports().then(() => { if (PAGE === "alerts") openAlertFromLink(); });
 
-// מזהים את המיקום שלי, כדי להציג אותו על המפה ולחשב מרחקים
-navigator.geolocation.getCurrentPosition(savePosition);
+  // מכינים את ההתראות, ואם הטלפון כבר רשום מעדכנים בשרת את המיקום
+  prepareNotifications().then(refreshMyLocation);
 
-showClock();                  // מציגים את השעון מיד
-setInterval(showClock, 1000); // ומעדכנים אותו כל שנייה
-setInterval(update, 5000);    // ההתראות מתעדכנות כל 5 שניות
+  // מזהים את המיקום שלי, כדי להציג אותו על המפה ולחשב מרחקים
+  navigator.geolocation.getCurrentPosition(savePosition);
+
+  showClock();                  // מציגים את השעון מיד
+  setInterval(showClock, 1000); // ומעדכנים אותו כל שנייה
+  setInterval(update, 5000);    // ההתראות מתעדכנות כל 5 שניות
+}

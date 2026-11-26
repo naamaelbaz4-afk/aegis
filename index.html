@@ -43,6 +43,9 @@
       <a class="nav-btn" href="alerts.html">התראות בזמן אמת <span class="badge" id="navCount">0</span> <!-- מספר ההתראות הפעילות --></a>
       <a class="nav-btn" href="about.html">אודות</a>
       <a class="nav-btn" href="history.html">היסטוריה</a>
+      <!-- המשתמש המחובר וכפתור יציאה. השם מגיע מ-FinalProject1.js -->
+      <span class="user-name">👤 <b id="userName"></b></span>
+      <button class="nav-btn logout-btn" onclick="logout()">יציאה</button>
     </nav>
   </header>
 
@@ -95,15 +98,14 @@
       </div>
     </div>
 
-    <!-- הצטרפות להתראות: רק מי שיש לו את הקוד הסודי יכול להצטרף -->
+    <!-- הפעלת התראות בטלפון של המשתמש המחובר -->
     <div class="report" style="margin-top: 20px;">
       <div>
         <h2>קבלת התראות לטלפון</h2>
-        <p id="joinStatus">מכניסים את קוד ההצטרפות ומאשרים התראות ומיקום. כל דיווח של חברי המערכת מגיע כהתראה לכל הטלפונים הרשומים, ובהתראה כתוב כמה האירוע רחוק.</p>
+        <p id="joinStatus">לוחצים על הכפתור ומאשרים התראות ומיקום. כל דיווח של חברי המערכת מגיע כהתראה לכל הטלפונים שהפעילו התראות, ובהתראה כתוב כמה האירוע רחוק.</p>
       </div>
       <div class="report-form">
-        <input id="joinCode" class="field" type="password" placeholder="קוד הצטרפות">
-        <button id="joinBtn" class="btn btn-ghost" onclick="joinAlerts()">הפעלת התראות</button>
+        <button id="joinBtn" class="btn btn-ghost" style="width: 100%;" onclick="joinAlerts()">הפעלת התראות</button>
       </div>
     </div>
 
